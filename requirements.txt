@@ -1,0 +1,8 @@
+google-generativeai 
+python-telegram-bot==12.8  
+Pillow  
+colorama  
+Markdown  
+Flask
+firebase_admin
+jsonpickle
