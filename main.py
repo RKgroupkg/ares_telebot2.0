@@ -17,21 +17,21 @@ import jsonpickle # type: ignore
 cred = credentials.Certificate("ares-rkbot-firebase-adminsdk-s8z98-7a3c805c5a.json")
 app = firebase_admin.initialize_app(cred, {"databaseURL": "https://ares-rkbot-default-rtdb.asia-southeast1.firebasedatabase.app/"})
 
-PASSWORD = "ares100"
+PASSWORD = os.environ.get('password')
 
 chat_histories ={}
 
-api_key = "AIzaSyCFXUAvecw7IWe9dSEFnWEmb4t-w8N72NI" # Set up gemnie client with your API key
-api_key2 = "AIzaSyBxCSoLIi6gsLCDLG25cdubonZafdNF4pI"
+api_key = os.environ.get('gemnie_api')
+api_key2 = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
-telegram_bot_token = "6680622532:AAFtdp3fB_OKrlq-BZTRp7X31I8bgrACKjI"
+telegram_bot_token = os.environ.get('telegram_api')
 
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()
 logger.setLevel(logging.INFO)
 
-formatter = logging.Formatter('%(asctime)s - %(process)d - %(levelname)s - %(threadName)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 
 logger.addHandler(handler)
@@ -791,4 +791,5 @@ def main() -> None:
 
 if __name__ == '__main__':
     DB = FireBaseDB()
+    keep_alive()
     main()
