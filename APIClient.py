@@ -1,4 +1,5 @@
 import google.generativeai as genai
+import time
 
 class APIClient:
     def __init__(self, api_keys):
