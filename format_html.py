@@ -1,218 +1,145 @@
 import re
-import markdown
-from markdown.extensions.nl2br import Nl2BrExtension
 
-def escape_html(text: str) -> str:
-    """Escapes HTML special characters in a string.
+def find_all_index(str, pattern):
+    index_list = [0]
+    for match in re.finditer(pattern, str, re.MULTILINE):
+        if match.group(1) != None:
+            start = match.start(1)
+            end = match.end(1)
+            index_list += [start, end]
+    index_list.append(len(str))
+    return index_list
 
-    Replaces &, <, > with HTML entities to prevent them
-    from being interpreted as HTML tags when output.
+def replace_all(text, pattern, function):
+    poslist = [0]
+    strlist = []
+    originstr = []
+    poslist = find_all_index(text, pattern)
+    for i in range(1, len(poslist[:-1]), 2):
+        start, end = poslist[i:i+2]
+        strlist.append(function(text[start:end]))
+    for i in range(0, len(poslist), 2):
+        j, k = poslist[i:i+2]
+        originstr.append(text[j:k])
+    if len(strlist) < len(originstr):
+        strlist.append('')
+    else:
+        originstr.append('')
+    new_list = [item for pair in zip(originstr, strlist) for item in pair]
+    return ''.join(new_list)
 
-    Args:
-        text (str): The text to escape.
+def escapeshape(text):
+    return '▎*' + " ".join(text.split()[1:]) + '*\n\n'
 
-    Returns:
-        str: The text with HTML characters escaped.
+def escapeminus(text):
+    return '\\' + text
+
+def escapeminus2(text):
+    return r'@+>@'
+
+def escapebackquote(text):
+    return r'\`\`'
+
+def escapebackquoteincode(text):
+    return r'@->@'
+
+def escapeplus(text):
+    return '\\' + text
+
+def escape_all_backquote(text):
+    return '\\' + text
+
+def find_lines_with_char(s, char, min_count):
     """
-    text = text.replace("&", "&amp;")
-    text = text.replace("<", "&lt;")
-    text = text.replace(">", "&gt;")
-    return text
+    返回字符串中每行包含特定字符至少min_count次的行的索引列表。
 
+    参数:
+    s (str): 要处理的字符串。
+    char (str): 要计数的字符。
+    min_count (int): 最小出现次数。
 
-def apply_hand_points(text: str) -> str:
-    """Replaces markdown bullet points (*) with right hand point emoji.
-
-    Arguments:
-    text (str): The text to modify.
-
-    Returns:
-    str: The text with markdown bullet points replaced with emoji.
+    返回:
+    list: 满足条件的行的索引列表。
     """
-    pattern = r"(?<=\n)\*\s(?!\*)|^\*\s(?!\*)"
+    lines = s.split('\n')  # 按行拆分字符串
 
-    replaced_text = re.sub(pattern, "👉 ", text)
-
-    return replaced_text
-
-
-def apply_bold(text: str) -> str:
-    """Replaces markdown bold formatting with HTML bold tags.
-
-    Arguments:
-    text (str): The text to modify.
-
-    Returns:
-    str: The text with markdown bold replaced by HTML tags.
-    """
-    pattern = r"\*\*(.*?)\*\*"
-    replaced_text = re.sub(pattern, r"<b>\1</b>", text)
-    return replaced_text
-
-
-def apply_italic(text: str) -> str:
-    """Replaces markdown italic formatting with HTML italic tags.
-
-    Arguments:
-    text (str): The text to modify.
-
-    Returns:
-    str: The text with markdown italic replaced by HTML tags.
-    """
-    pattern = r"(?<!\*)\*(?!\*)(?!\*\*)(.*?)(?<!\*)\*(?!\*)"
-    replaced_text = re.sub(pattern, r"<i>\1</i>", text)
-    return replaced_text
-
-
-def apply_code(text: str) -> str:
-    """Replace markdown code blocks with HTML <pre> tags.
-
-    Arguments:
-    text (str): The text to modify.
-
-    Returns:
-    str: The text with markdown code blocks replaced by HTML tags.
-    """
-    pattern = r"```([\w]*?)\n([\s\S]*?)```"
-    replaced_text = re.sub(pattern, r"<pre lang='\1'>\2</pre>", text, flags=re.DOTALL)
-    return replaced_text
-
-
-def apply_monospace(text: str) -> str:
-    """Replaces markdown monospace backticks with HTML <code> tags.
-
-    Arguments:
-    text (str): The input text containing markdown monospace formatting.
-
-    Returns:
-    str: The text with monospace sections replaced with HTML tags.
-    """
-    pattern = r"(?<!`)`(?!`)(.*?)(?<!`)`(?!`)"
-    replaced_text = re.sub(pattern, r"<code>\1</code>", text)
-    return replaced_text
-
-
-def apply_link(text: str) -> str:
-    """Replace markdown links with HTML anchor tags.
-
-    Arguments:
-    text (str): The input text containing markdown links.
-
-    Returns:
-    str: The text with markdown links replaced by HTML anchor tags.
-    """
-    pattern = r"\[(.*?)\]\((.*?)\)"
-    replaced_text = re.sub(pattern, r'<a href="\2">\1</a>', text)
-    return replaced_text
-
-
-def apply_underline(text: str) -> str:
-    """Replace markdown underline with HTML underline tags.
-
-    Arguments:
-    text (str): The input text to modify.
-
-    Returns:
-    str: The text with markdown underlines replaced with HTML tags."""
-    pattern = r"__(.*?)__"
-    replaced_text = re.sub(pattern, r"<u>\1</u>", text)
-    return replaced_text
-
-
-def apply_strikethrough(text: str) -> str:
-    """Replace markdown strikethrough with HTML strikethrough tags.
-
-    Arguments:
-    text (str): The input text to modify.
-
-    Returns:
-    str: The text with markdown strikethroughs replaced with HTML tags.
-    """
-    pattern = r"~~(.*?)~~"
-    replaced_text = re.sub(pattern, r"<s>\1</s>", text)
-    return replaced_text
-
-
-def apply_header(text: str) -> str:
-    """Replace markdown header # with HTML header tags.
-
-    Arguments:
-    text (str): The input text to modify.
-
-    Returns:
-    str: The text with markdown headers replaced with HTML tags.
-    """
-    pattern = r"^(#{1,6})\s+(.*)"
-    replaced_text = re.sub(pattern, r"<b><u>\2</u></b>", text, flags=re.DOTALL)
-    return replaced_text
-
-
-def apply_exclude_code(text: str) -> str:
-    """Apply text formatting to non-code lines.
-
-    Iterates through each line, checking if it is in a code block.
-    If not, applies header, link, bold, italic, underline, strikethrough, monospace, and hand-point
-    text formatting.
-    """
-    lines = text.split("\n")
-    in_code_block = False
-
-    for i, line in enumerate(lines):
-        if line.startswith("```"):
-            in_code_block = not in_code_block
-
-        if not in_code_block:
-            formatted_line = lines[i]
-            formatted_line = apply_header(formatted_line)
-            formatted_line = apply_link(formatted_line)
-            formatted_line = apply_bold(formatted_line)
-            formatted_line = apply_italic(formatted_line)
-            formatted_line = apply_underline(formatted_line)
-            formatted_line = apply_strikethrough(formatted_line)
-            formatted_line = apply_monospace(formatted_line)
-            formatted_line = apply_hand_points(formatted_line)
-            lines[i] = formatted_line
+    for index, line in enumerate(lines):
+        if re.sub(r"```", '', line).count(char) % 2 != 0 or (not line.strip().startswith("```") and line.count(char) % 2 != 0):
+            # lines[index] = re.sub(r"`", '\`', line)
+            lines[index] = replace_all(lines[index], r"\\`|(`)", escape_all_backquote)
 
     return "\n".join(lines)
 
+def escape(text, flag=0):
+    # In all other places characters
+    # _ * [ ] ( ) ~ ` > # + - = | { } . !
+    # must be escaped with the preceding character '\'.
+    text = re.sub(r"\\\[", '@->@', text)
+    text = re.sub(r"\\\]", '@<-@', text)
+    text = re.sub(r"\\\(", '@-->@', text)
+    text = re.sub(r"\\\)", '@<--@', text)
+    if flag:
+        text = re.sub(r"\\\\", '@@@', text)
+    text = re.sub(r"\\`", '@<@', text)
+    text = re.sub(r"\\", r"\\\\", text)
+    if flag:
+        text = re.sub(r"\@{3}", r"\\\\", text)
+    text = re.sub(r"_", '\_', text)
+    text = re.sub(r"\*{2}(.*?)\*{2}", '@@@\\1@@@', text)
+    text = re.sub(r"\n{1,2}\*\s", '\n\n• ', text)
+    text = re.sub(r"\*", '\*', text)
+    text = re.sub(r"\@{3}(.*?)\@{3}", '*\\1*', text)
+    text = re.sub(r"\!?\[(.*?)\]\((.*?)\)", '@@@\\1@@@^^^\\2^^^', text)
+    text = re.sub(r"\[", '\[', text)
+    text = re.sub(r"\]", '\]', text)
+    text = re.sub(r"\(", '\(', text)
+    text = re.sub(r"\)", '\)', text)
+    text = re.sub(r"\@\-\>\@", '\[', text)
+    text = re.sub(r"\@\<\-\@", '\]', text)
+    text = re.sub(r"\@\-\-\>\@", '\(', text)
+    text = re.sub(r"\@\<\-\-\@", '\)', text)
+    text = re.sub(r"\@{3}(.*?)\@{3}\^{3}(.*?)\^{3}", '[\\1](\\2)', text)
+    text = re.sub(r"~", '\~', text)
+    text = re.sub(r">", '\>', text)
+    text = replace_all(text, r"(^#+\s.+?\n+)|```[\D\d\s]+?```", escapeshape)
+    text = re.sub(r"#", '\#', text)
+    text = replace_all(text, r"(\+)|\n[\s]*-\s|```[\D\d\s]+?```|`[\D\d\s]*?`", escapeplus)
+    text = re.sub(r"\n{1,2}(\s*\d{1,2}\.\s)", '\n\n\\1', text)
+    # # 把 code block 以外的 - 替换掉
+    text = replace_all(text, r"```[\D\d\s]+?```|(-)", escapeminus2)
+    text = re.sub(r"-", '@<+@', text)
+    text = re.sub(r"\@\+\>\@", '-', text)
 
-def format_message(text: str) -> str:
-    """Format the given message text from markdown to HTML.
+    text = re.sub(r"\n{1,2}(\s*)-\s", '\n\n\\1• ', text)
+    text = re.sub(r"\@\<\+\@", '\-', text)
+    text = replace_all(text, r"(-)|\n[\s]*-\s|```[\D\d\s]+?```|`[\D\d\s]*?`", escapeminus)
+    text = re.sub(r"```([\D\d\s]+?)```", '@@@\\1@@@', text)
+    # 把 code block 里面的`替换掉
+    text = replace_all(text, r"\@\@\@[\s\d\D]+?\@\@\@|(`)", escapebackquoteincode)
+    text = re.sub(r"`", '\`', text)
+    text = re.sub(r"\@\<\@", '\`', text)
+    text = re.sub(r"\@\-\>\@", '`', text)
 
-    Escapes HTML characters, applies link, code, and other rich text formatting,
-    and returns the formatted HTML string.
+    # text = replace_all(text, r"`.*?`{1,2}|(`)", escapebackquoteincode)
+    # text = re.sub(r"`", '\`', text)
+    # text = re.sub(r"\@\-\>\@", '`', text)
+    # print(text)
 
-    Args:
-      message (str): The plain text message to format.
+    text = replace_all(text, r"(``)", escapebackquote)
+    text = re.sub(r"\@{3}([\D\d\s]+?)\@{3}", '```\\1```', text)
+    text = re.sub(r"=", '\=', text)
+    text = re.sub(r"\|", '\|', text)
+    text = re.sub(r"{", '\{', text)
+    text = re.sub(r"}", '\}', text)
+    text = re.sub(r"\.", '\.', text)
+    text = re.sub(r"!", '\!', text)
+    text = find_lines_with_char(text, '`', 5)
+    return text
 
-    Returns:
-      str: The formatted HTML string.
-    """
-    formatted_text = escape_html(text)
-    formatted_text = apply_exclude_code(formatted_text)
-    formatted_text = apply_code(formatted_text)
-    return formatted_text
 
 
-def markdown_to_telegram_html(markdown_text):
-    """Converts Markdown-like text to Telegram-compatible HTML."""
-    html = markdown.markdown(markdown_text, extensions=[Nl2BrExtension()])
-
-    # Remove unsupported tags (headings, blockquotes, etc.)
-    unsupported_tags = ["h\d", "blockquote"]
-    for tag in unsupported_tags:
-        html = re.sub(rf"<{tag}>.*?</{tag}>", "", html, flags=re.DOTALL)
-
-    # Replace paragraph tags with empty string
-    html = html.replace("<p>", "").replace("</p>", "")
-
-    # Convert lists to '-' or '*' (MarkdownV2 style)
-    html = re.sub(r"<ul>|</ul>|<ol>|</ol>", "", html)
-    html = re.sub(r"<li>", "<b>- </b>", html)
-    html = re.sub(r"</li>", "", html)
-
-    # Replace <br> and <hr> tags with appropriate newline characters
-    html = re.sub(r"<br\s*/?>", "\n", html)
-    html = re.sub(r"<hr\s*/?>", "\n\n", html)
-
-    return html
+if __name__ == '__main__':
+    import os
+    os.system('clear')
+    text = escape(input("text"))
+    print(text)
