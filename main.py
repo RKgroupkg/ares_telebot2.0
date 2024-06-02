@@ -230,7 +230,7 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
     logger.info(f"chatId({chat_id}) changed its Promt to :'{new_promt}'")
     if new_promt :
         print(f"arg in lower case :{context.args[0].lower()} is it command? :{context.args[0].lower() == 'd'} ")
-        if  context.args[0].lower() == 'd':
+        if  context.args[0].lower() == 'd' or context.args[0].lower() == 'default' or context.args[0].lower() == 'orignal':
         
            chat_histories[chat_id] = model.start_chat(history=[] )
            update.message.reply_text(f"The prompt has been successfully changed to: <b>'default'</b>", parse_mode='HTML')
