@@ -115,6 +115,8 @@ Begin your message with <i>Hey Ares</i> or <i>Hi Ares</i>. Keep the conversation
 * <i>/token</i>: Check how many tokens have been used.
 * <i>/clear_history</i>: Wipe the slate clean and start fresh.
 * <i>/history</i>: ⚠️ Use with caution, as it might crash with long chats.
+* <i>/info</i>: gives info about the current chat session.
+* <i>/refresh</i>: it refresh the bot session from cloud .
 
 <b>About Limitations:</b>
 
