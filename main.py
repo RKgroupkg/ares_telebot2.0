@@ -24,7 +24,6 @@ chat_histories ={}
 
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
-api_key.use_api()
 telegram_bot_token = os.environ.get('telegram_api')
 
 
