@@ -288,7 +288,7 @@ def process_message_thread(update: Update,chat_id :str,user_message: str,context
             
             if hasattr(response, "text"):
                 # Code that might raise the AttributeError (e.g., accessing the 'text' attribute of a variable)
-                send_message(update,response.text)
+                send_message(update,message = response.text,format = True,parse_mode ="MarkdownV2") 
                 logger.info(f"Prompt({chat_id}): {prompt}\n\n\nResponse: \n{response.text}")
 
             else:
@@ -308,25 +308,23 @@ def process_message_thread(update: Update,chat_id :str,user_message: str,context
             except Exception:  # If the original message couldn't be edited
                 logger.error("Error cant send the message")
 
-def send_message(update: Update,message: str,format = True) -> None:
+def send_message(update: Update,message: str,format = True,parse_mode = "HTML") -> None:
     try:
 
         def send_wrap(message_ :str):
             chunks = textwrap.wrap(message_, width=3500, break_long_words=False, replace_whitespace=False)
             for chunk in chunks:
-                update.message.reply_text(chunk, parse_mode='HTML')
+                update.message.reply_text(chunk, parse_mode= parse_mode)
 
 
 
         if format:
             try:
-                html_message = format_html.format_message(message)
+                html_message = format_html.escape(message)
                 send_wrap(html_message)
                 
             except Exception as e:
-                logger.warning(f"Using (markdown_to_telegram_html) functon because (format_message) cant parse the response error:{e}")
-                html_message = format_html.markdown_to_telegram_html(message)
-                send_wrap(html_message)
+                logger.warning(f"cant parse the response error:{e}")
         else:
             logger.warning("sending unformated message")
             send_wrap(str(message))
@@ -337,7 +335,6 @@ def send_message(update: Update,message: str,format = True) -> None:
         
         update.message.reply_text(f"woops! an An error occurred while sending the message: {e}", parse_mode='HTML')
         logger.error(f"An error occurred while sending the message:{e}")
-
 
 
 
@@ -465,7 +462,7 @@ def history(update: Update, context: CallbackContext) -> None:
                 if arg_chat_id in chat_histories:
                     # If provided chat ID is in active sessions, retrieve its history
                     history_text = f"Chat historyfor chat ID {arg_chat_id}:\n{format_chat_history(chat_histories[arg_chat_id].history)}"
-                    send_message(update,history_text,False)
+                    send_message(update,message = history_text,format = False,parse_mode ="HTML") 
                 else:
                     update.message.reply_text("Error 404: Chat ID not found.", parse_mode='HTML')
             except Exception as e:
@@ -477,7 +474,7 @@ def history(update: Update, context: CallbackContext) -> None:
             # If no argument is provided, retrieve history for the current session chat
             if chat_id in chat_histories:
                 history_text = f"Chat history:\n{format_chat_history(chat_histories[chat_id].history)}"
-                send_message(update,history_text,False)
+                 send_message(update,message = history_text,format = False,parse_mode ="HTML") 
             else:
                 update.message.reply_text("There is no chat history.")
     except Exception as e:
@@ -675,7 +672,7 @@ def download_and_process_video(update: Update, context: CallbackContext, media) 
 
         # Check and handle the response from Gemini
         if hasattr(response, "text"):
-            send_message(update,response.text)
+            send_message(update,message = response.text,format = True,parse_mode ="MarkdownV2") 
         else:
             update.message.reply_text(
                     f"<b>My apologies</b>, I've reached my <i>usage limit</i> for the moment. ⏳ Please try again in a few minutes. \n\n<i>Response :</i> {response}",
