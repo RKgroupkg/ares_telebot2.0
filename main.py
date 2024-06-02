@@ -221,14 +221,17 @@ def generate_response(chat_id, input_text: str) -> str:
             response = chat_history.send_message(input_text)
         except Exception as e:
             logger.error(f"Error occured while genrating response: {e}")
+            response= f"Error occured while genrating response: {e}"
         
         if not hasattr(response, "text"):
            api_key.switch_to_next_api()
            logger.error(f"Error cant genrate first time \n reponse:{response} \n\n now changed the api key  ")
            try:
               response = chat_history.send_message(input_text)
+               
            except Exception as e:
               logger.error(f"Error occured while genrating response: {e}")
+              response= f"Error occured while genrating response: {e}"
 
            if not hasattr(response, "text"):
              response = f"*My apologies*, I've reached my _usage limit_ for the moment. ⏳ Please try again in a few minutes. \n\n _Response :_ {response}"
