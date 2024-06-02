@@ -22,38 +22,8 @@ PASSWORD = os.environ.get('password')
 
 chat_histories ={}
 
-
-class APIClient:
-    def __init__(self, api_keys):
-        self.api_keys = api_keys
-        self.current_api_index = 0
-        self.last_used_time = {}
-
-    def switch_to_next_api(self):
-        self.current_api_index = (self.current_api_index + 1) % len(self.api_keys)
-
-    def use_api(self):
-        current_api_key = self.api_keys[self.current_api_index]
-        
-        # Check if the API key was used recently
-        if current_api_key in self.last_used_time:
-            last_used_timestamp = self.last_used_time[current_api_key]
-            elapsed_time = time.time() - last_used_timestamp
-            if elapsed_time < 60:  # 60 seconds interval
-                print("Safety system activated: Waiting before using the next API key...")
-                raise ValueError(f"Safety system activated: the api is being used to early cant change to next api pls wait 60 sec")
-
-        # Simulate API usage
-        genai.configure(api_key=current_api_key)
-        print(f"Using API key: {current_api_key}")
-
-        # Update last used time
-        self.last_used_time[current_api_key] = time.time()
-      
 api_key = os.environ.get('gemnie_api')
-api_key2 = os.environ.get('gemnie_api2')
-api_key3 = os.environ.get('gemnie_api3')
-api_key = APIClient([api_key,api_key2,api_key3])
+genai.configure(api_key=api_key)
 api_key.use_api()
 telegram_bot_token = os.environ.get('telegram_api')
 
@@ -224,20 +194,8 @@ def generate_response(chat_id, input_text: str) -> str:
             response= f"Error occured while genrating response: {e}"
         
         if not hasattr(response, "text"):
-           api_key.switch_to_next_api()
-           logger.error(f"Error cant genrate first time \n reponse:{response} \n\n now changed the api key  ")
-           try:
-              response = chat_history.send_message(input_text)
-               
-           except Exception as e:
-              logger.error(f"Error occured while genrating response: {e}")
-              response= f"Error occured while genrating response: {e}"
-
-           if not hasattr(response, "text"):
-             response = f"*My apologies*, I've reached my _usage limit_ for the moment. ⏳ Please try again in a few minutes. \n\n _Response :_ {response}"
-             logger.error(f"Error cant make a reponse tryed to change the api error : {response}")
-           else:
-              response = f"{response.text}\n\n This response took time because it was genrated twice due to limit of quota reached."
+          response = f"*My apologies*, I've reached my _usage limit_ for the moment. ⏳ Please try again in a few minutes. \n\n Response : {response}"
+        
         else:
           response = response.text
             
