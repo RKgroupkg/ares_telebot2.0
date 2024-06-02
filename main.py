@@ -15,7 +15,7 @@ import firebase_admin
 from firebase_admin import db, credentials
 import jsonpickle # type: ignore
 
-cred = credentials.Certificate("ares-rkbot-firebase-adminsdk-s8z98-7a3c805c5a.json")
+cred = credentials.Certificate(json.loads(os.environ.get('fire_base')))
 app = firebase_admin.initialize_app(cred, {"databaseURL": "https://ares-rkbot-default-rtdb.asia-southeast1.firebasedatabase.app/"})
 
 PASSWORD = os.environ.get('password')
