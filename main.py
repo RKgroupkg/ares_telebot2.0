@@ -474,7 +474,7 @@ def history(update: Update, context: CallbackContext) -> None:
             # If no argument is provided, retrieve history for the current session chat
             if chat_id in chat_histories:
                 history_text = f"Chat history:\n{format_chat_history(chat_histories[chat_id].history)}"
-                 send_message(update,message = history_text,format = False,parse_mode ="HTML") 
+                send_message(update,message = history_text,format = False,parse_mode ="HTML") 
             else:
                 update.message.reply_text("There is no chat history.")
     except Exception as e:
