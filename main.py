@@ -462,7 +462,7 @@ def history(update: Update, context: CallbackContext) -> None:
                 if arg_chat_id in chat_histories:
                     # If provided chat ID is in active sessions, retrieve its history
                     history_text = f"Chat historyfor chat ID {arg_chat_id}:\n{format_chat_history(chat_histories[arg_chat_id].history)}"
-                    send_message(update,message = history_text,format = False,parse_mode ="HTML") 
+                    send_message(update,message = history_text,format = False,parse_mode ="MarkdownV2") 
                 else:
                     update.message.reply_text("Error 404: Chat ID not found.", parse_mode='HTML')
             except Exception as e:
@@ -474,7 +474,7 @@ def history(update: Update, context: CallbackContext) -> None:
             # If no argument is provided, retrieve history for the current session chat
             if chat_id in chat_histories:
                 history_text = f"Chat history:\n{format_chat_history(chat_histories[chat_id].history)}"
-                send_message(update,message = history_text,format = False,parse_mode ="HTML") 
+                send_message(update,message = history_text,format = False,parse_mode ="MarkdownV2") 
             else:
                 update.message.reply_text("There is no chat history.")
     except Exception as e:
@@ -484,7 +484,7 @@ def history(update: Update, context: CallbackContext) -> None:
 def format_chat_history(chat_history):
     formatted_history = ""
     for message in chat_history:
-        formatted_history += f'<b>{message.role}</b>: <i>{message.parts[0].text}</i>\n'
+        formatted_history += f'* {message.role} *: * {message.parts[0].text}_\n'
     return formatted_history
 
 
