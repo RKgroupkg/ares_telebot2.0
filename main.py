@@ -12,6 +12,7 @@ import config
 from keep_alive import keep_alive
 
 import firebase_admin
+from APIClient import APIClient 
 from firebase_admin import db, credentials
 import jsonpickle # type: ignore
 
@@ -23,8 +24,10 @@ PASSWORD = os.environ.get('password')
 chat_histories ={}
 
 api_key = os.environ.get('gemnie_api')
-api_key2 = os.environ.get('gemnie_api')
-genai.configure(api_key=api_key)
+api_key2 = os.environ.get('gemnie_api2')
+api_key3 = os.environ.get('gemnie_api3')
+api_key = APIClient([api_key,api_key2,api_key3])
+api_key.use_api()
 telegram_bot_token = os.environ.get('telegram_api')
 
 
@@ -188,7 +191,18 @@ def generate_response(chat_id, input_text: str) -> str:
     logger.info("Generating response...")
     try:
         response = chat_history.send_message(input_text)
-
+        if not hasattr(response, "text"):
+           api_key.switch_to_next_api()
+           logger.error(f"Error cant genrate first time \n reponse:{response} \n\n now changed the api key  ")
+           response = chat_history.send_message(input_text)
+           if not hasattr(response, "text"):
+             response = f"*My apologies*, I've reached my _usage limit_ for the moment. ⏳ Please try again in a few minutes. \n\n _Response :_ {response}"
+             logger.error(f"Error cant make a reponse tryed to change the api error : {response}")
+           else:
+              response = f"{response.text}\n\n This response took time because it was genrated twice due to limit of quota reached."
+        else:
+          response = response.text
+            
         def update():
             try:
                 with lock:  # Use a thread-safe lock for Firebase access
@@ -286,18 +300,10 @@ def process_message_thread(update: Update,chat_id :str,user_message: str,context
             # Generate the response
             response =generate_response(chat_id,prompt)
             
-            if hasattr(response, "text"):
-                # Code that might raise the AttributeError (e.g., accessing the 'text' attribute of a variable)
-                send_message(update,message = response.text,format = True,parse_mode ="MarkdownV2") 
-                logger.info(f"Prompt({chat_id}): {prompt}\n\n\nResponse: \n{response.text}")
-
-            else:
-                update.message.reply_text(
-                    f"<b>My apologies</b>, I've reached my <i>usage limit</i> for the moment. ⏳ Please try again in a few minutes. \n\n<i>Response :</i> {response}",
-                    parse_mode='HTML'
-                )
-                logger.error(f"quato error!\n\nreponse:{response}")
-
+    
+            # Code that might raise the AttributeError (e.g., accessing the 'text' attribute of a variable)
+            send_message(update,message = response,format = True,parse_mode ="MarkdownV2") 
+            logger.info(f"Prompt({chat_id}): {prompt}\n\n\nResponse: \n{response.text}")
 
 
 
