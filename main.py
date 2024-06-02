@@ -330,7 +330,7 @@ def process_message_thread(update: Update,chat_id :str,user_message: str,context
     
             # Code that might raise the AttributeError (e.g., accessing the 'text' attribute of a variable)
             send_message(update,message = response,format = True,parse_mode ="MarkdownV2") 
-            logger.info(f"Prompt({chat_id}): {prompt}\n\n\nResponse: \n{response.text}")
+            logger.info(f"Prompt({chat_id}): {prompt}\n\n\nResponse: \n{response}")
 
 
 
