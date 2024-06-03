@@ -1,5 +1,5 @@
 import logging,telegram
-from telegram import Update,ChatAction,InlineKeyboardMarkup, InlineKeyboardButton # version = 12.8
+from telegram import Update,ChatAction,InlineKeyboardMarkup, InlineKeyboardButton,ParseMode # version = 12.8
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext,CommandHandler,CallbackQueryHandler
 import google.generativeai as genai
 import threading
@@ -11,6 +11,7 @@ import time,datetime
 import config
 
 import wikipedia
+from wikipedia.exceptions import DisambiguationError, PageError
 
 from keep_alive import keep_alive
 
