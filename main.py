@@ -761,11 +761,12 @@ def download_images(query, limit=4, output_dir="images"):
     downloaded_images = []
 
     try:
+        path = None
         downloader.download(query, limit=limit, output_dir=output_dir, adult_filter_off=False, force_replace=False, timeout=60)
-        path = f"{output_dir}\{query}"
+        path = f"images/{query}"
         downloaded_images = [os.path.join(path, f) for f in os.listdir(path) if f.endswith((".jpg", ".jpeg", ".png", ".gif"))]
     except Exception as e:
-        logger.error(f"Error downloading images: {e}")
+        logger.error(f"Error downloading images: {e} path:{path}")
 
     return downloaded_images
 
