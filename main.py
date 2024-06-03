@@ -10,6 +10,8 @@ import format_html
 import time,datetime
 import config
 
+import wikipedia
+
 from keep_alive import keep_alive
 
 from bing_image_downloader import downloader 
@@ -805,7 +807,48 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
             context.bot.send_message(chat_id, text="No images found for your search.")
     
     threading.Thread(target=image_pros, args=(update,context,query_)).start()
+  
+def wiki(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    search = " ".join(context.args)
+    if search:
+      try:
+          res = wikipedia.summary(search)
+      except DisambiguationError as e:
+          update.message.reply_text(
+              "Disambiguated pages found! Adjust your query accordingly.\n<i>{}</i>".format(e),
+              parse_mode=ParseMode.HTML,
+          )
+      except PageError as e:
+          update.message.reply_text(
+              "<code>{}</code>".format(e), parse_mode=ParseMode.HTML
+          )
+      if res:
+        result = f"<b>{search}</b>\n\n"
+        result += f"<i>{res}</i>\n"
+        result += f"""<a href="https://en.wikipedia.org/wiki/{search.replace(" ", "%20")}">Read more...</a>"""
+         if len(result) > 4000:
+            with open("result.txt", "w") as f:
+                f.write(f"{result}\n\nUwU OwO OmO UmU")
+            with open("result.txt", "rb") as f:
+                context.bot.send_document(
+                    document=f,
+                    filename=f.name,
+                    reply_to_message_id=update.message.message_id,
+                    chat_id=chat_id,
+                    parse_mode=ParseMode.HTML,
+                )
+        else:
+            update.message.reply_text(
+                result, parse_mode=ParseMode.HTML, disable_web_page_preview=True
+            )
+       
+    else:
+       update.message.reply_text("Error 400! pls provide a query to search in wiki!", parse_mode=ParseMode.HTML)
+      
+    
 
+  
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -830,6 +873,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
 
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
+    dispatcher.add_handler(CommandHandler("wiki", wiki))
 
     
                                     
