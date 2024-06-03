@@ -765,7 +765,7 @@ def download_images(query, limit=4, output_dir="images"):
         path = f"{output_dir}\{query}"
         downloaded_images = [os.path.join(path, f) for f in os.listdir(path) if f.endswith((".jpg", ".jpeg", ".png", ".gif"))]
     except Exception as e:
-        print(f"Error downloading images: {e}")
+        logger.error(f"Error downloading images: {e}")
 
     return downloaded_images
 
@@ -775,6 +775,7 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
 
     chat_id = update.effective_chat.id
     query_ = " ".join(context.args)
+    logger.info(f"chatId:{chat_id} used /image command with this query:{query_}")
 
     if not query_:
         context.bot.send_message(chat_id, text="Please provide a search query for images.")
