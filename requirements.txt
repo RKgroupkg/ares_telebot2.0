@@ -6,3 +6,4 @@ Markdown
 Flask
 firebase_admin
 jsonpickle
+bing_image_downloader
