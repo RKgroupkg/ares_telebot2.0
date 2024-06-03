@@ -135,6 +135,8 @@ Begin your message with <i>Hey Ares</i> or <i>Hi Ares</i>. Keep the conversation
 * <i>/history</i>: ⚠️ Use with caution, as it might crash with long chats.
 * <i>/info</i>: gives info about the current chat session.
 * <i>/refresh</i>: it refresh the bot session from cloud .
+* <i>/image</i>: /image <keyword> to search image from cloud .
+* <i>/wiki</i>: /wiki <keyword> to summarize from wiki.
 
 <b>About Limitations:</b>
 
