@@ -5,11 +5,15 @@ import google.generativeai as genai
 import threading
 import textwrap
 import PIL.Image
-import os
+import os,json
 import format_html
-import time,datetime,json
+import time,datetime
 import config
+
 from keep_alive import keep_alive
+
+from bing_image_downloader import downloader 
+import shutil
 
 import firebase_admin 
 from firebase_admin import db, credentials
@@ -741,6 +745,65 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
   else:
     update.message.reply_text("Please provide chat IDs. Usage: /chatinfo <chat_id1> <chat_id2> ...")
 
+
+def download_images(query, limit=4, output_dir="images"):
+    """Downloads images from Bing Image Search and handles download errors.
+
+    Args:
+        query (str): The search query for images.
+        limit (int, optional): The maximum number of images to download. Defaults to 4.
+        output_dir (str, optional): The directory to save downloaded images. Defaults to "images".
+
+    Returns:
+        list[str]: A list of file paths to downloaded images (or an empty list if none).
+    """
+
+    downloaded_images = []
+
+    try:
+        downloader.download(query, limit=limit, output_dir=output_dir, adult_filter_off=False, force_replace=False, timeout=60)
+        path = f"{output_dir}\{query}"
+        downloaded_images = [os.path.join(path, f) for f in os.listdir(path) if f.endswith((".jpg", ".jpeg", ".png", ".gif"))]
+    except Exception as e:
+        print(f"Error downloading images: {e}")
+
+    return downloaded_images
+
+
+def image_command_handler(update: Update, context: CallbackContext) -> None:
+    """Handles the `/image` command to download and send images."""
+
+    chat_id = update.effective_chat.id
+    query_ = " ".join(context.args)
+
+    if not query_:
+        context.bot.send_message(chat_id, text="Please provide a search query for images.")
+        return
+    context.bot.send_message(chat_id, text="Please wait for downloading images.")
+    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.FIND_LOCATION)
+
+    def image_pros(update,context,query_):
+        start_time = time.time()
+        downloaded_images = download_images(query_)
+        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
+
+        if downloaded_images:
+            for image_path in downloaded_images:
+                with open(image_path, 'rb') as image_file:
+                    context.bot.send_photo(chat_id, photo=image_file)
+                    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
+                # Delete the downloaded image after sending
+                os.remove(image_path)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            
+            context.bot.send_message(chat_id, text=f"Sent {len(downloaded_images)} images for your search. time taken {round(elapsed_time, 2)} Sec")
+            shutil.rmtree(f"images/{query_}")
+        else:
+            context.bot.send_message(chat_id, text="No images found for your search.")
+    
+    threading.Thread(target=image_pros, args=(update,context,query_)).start()
+
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -763,6 +826,9 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(button))
     dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
+
+    dispatcher.add_handler(CommandHandler("image", image_command_handler))
+
     
                                     
 
