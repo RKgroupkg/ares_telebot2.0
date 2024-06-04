@@ -8,3 +8,4 @@ firebase_admin
 jsonpickle
 bing_image_downloader
 wikipedia
+requests
