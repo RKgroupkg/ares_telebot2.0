@@ -10,7 +10,7 @@ import format_html
 import time,datetime
 import config
 
-import wikipedia
+import wikipedia,requests
 from wikipedia.exceptions import DisambiguationError, PageError
 
 from keep_alive import keep_alive
