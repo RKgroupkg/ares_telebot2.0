@@ -848,8 +848,69 @@ def wiki(update: Update, context: CallbackContext):
         
     else:
        update.message.reply_text("Error 400! pls provide a query to search in wiki!", parse_mode=ParseMode.HTML)
+
+def create_image(prompt: str) -> bytes:
+        """Generates an AI-generated image based on the provided prompt.
+
+        Args:
+            prompt (str): The input prompt for generating the image.
+
+        Returns:
+            bytes: The generated image in bytes format.
+            
+        Example usage:
       
-    
+        >>> generated_image= ai_image("boy image")
+        >>> print(generated_image)
+        """
+        url = "https://ai-api.magicstudio.com/api/ai-art-generator"
+
+        form_data = {
+            'prompt': prompt,
+            'output_format': 'bytes',
+            'request_timestamp': str(int(time.time())),
+            'user_is_subscribed': 'false',
+        }
+
+        response = requests.post(url, data=form_data)
+        if response.status_code == 200:
+            try:
+                if response.content:
+                    return response.content
+                else:
+                    raise Exception("Failed to get image from the server.")
+            except Exception as e:
+                raise e
+        else:
+            raise Exception("Error:", response.status_code)
+          
+def imagine(update: Update, context: CallbackContext):
+    chat_id = update.effective_chat.id
+    search = " ".join(context.args)
+    if not search:
+      update.message.reply_text(f"error 404 no promt provided pls provide prompt")
+      return 
+      
+      
+    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.FIND_LOCATION)
+    try:
+      
+        x = create_image(search)
+        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
+        
+        with open("image.jpg", 'wb') as f:
+            f.write(x)
+        caption = f"""
+        prompt: {search}
+
+        chat_id: {chat_id}
+
+
+"""
+  
+        update.message.reply_photo("image.jpg",caption=caption,quote=True)
+    except Exception as e:
+        update.message.reply_text(f"error while generating image error : {e}")
 
   
 def main() -> None:
