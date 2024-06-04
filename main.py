@@ -10,7 +10,7 @@ import format_html
 import time,datetime
 import config
 
-import wikipedia,requests
+import wikipedia,requests,base64
 from wikipedia.exceptions import DisambiguationError, PageError
 
 from keep_alive import keep_alive
@@ -863,7 +863,7 @@ def create_image(prompt: str) -> bytes:
         >>> generated_image= ai_image("boy image")
         >>> print(generated_image)
         """
-        url = "https://ai-api.magicstudio.com/api/ai-art-generator"
+        url =base64.b64decode('aHR0cHM6Ly9haS1hcGkubWFnaWNzdHVkaW8uY29tL2FwaS9haS1hcnQtZ2VuZXJhdG9y').decode("utf-8")
 
         form_data = {
             'prompt': prompt,
