@@ -316,6 +316,7 @@ def process_message_thread(update: Update,chat_id :str,user_message: str,context
             except Exception:  # If the original message couldn't be edited
                 logger.error("Error cant send the message")
 
+
 def send_message(update: Update,message: str,format = True,parse_mode = "HTML") -> None:
     try:
 
@@ -470,7 +471,7 @@ def history(update: Update, context: CallbackContext) -> None:
                 if arg_chat_id in chat_histories:
                     # If provided chat ID is in active sessions, retrieve its history
                     history_text = f"Chat historyfor chat ID {arg_chat_id}:\n{format_chat_history(chat_histories[arg_chat_id].history)}"
-                    send_message(update,message = history_text,format = False,parse_mode ="MarkdownV2") 
+                    send_message(update,message = history_text,format = True,parse_mode ="MarkdownV2") 
                 else:
                     update.message.reply_text("Error 404: Chat ID not found.", parse_mode='HTML')
             except Exception as e:
@@ -492,7 +493,7 @@ def history(update: Update, context: CallbackContext) -> None:
 def format_chat_history(chat_history):
     formatted_history = ""
     for message in chat_history:
-        formatted_history += f'* {message.role} *: * {message.parts[0].text}_\n'
+        formatted_history += f'*{message.role}*: *{message.parts[0].text}_\n'
     return formatted_history
 
 
@@ -511,7 +512,7 @@ def process_image(update: Update, context: CallbackContext) -> None:
     def handle_image():
         try:
             if update.message.photo:
-                 if update.message.caption else ""
+                 
 
                 file_id = update.message.photo[-1].file_id
                 file = context.bot.get_file(file_id)
@@ -528,7 +529,8 @@ def process_image(update: Update, context: CallbackContext) -> None:
                     return
 
                 if hasattr(response, "text"):
-                    send_message(update,response.text)
+                  
+                    send_message(update,message = response.text,format = True,parse_mode ="MarkdownV2") 
                     DB.chat_history_add(chat_id,get_chat_history(chat_id).history)
                 else:
                   update.message.reply_text(
