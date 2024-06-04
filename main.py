@@ -919,7 +919,7 @@ def imagine(update: Update, context: CallbackContext):
 
 """
   
-        update.message.reply_photo("image.jpg",caption=caption,quote=True)
+        update.message.reply_photo(photo=open("image.jpg", 'rb'), caption=caption, quote=True)
     except Exception as e:
         update.message.reply_text(f"error while generating image error : {e}")
         logger.error(f"error while generating image error : {e}")
