@@ -498,6 +498,12 @@ def format_chat_history(chat_history):
 
 def process_image(update: Update, context: CallbackContext) -> None:
     chat_id = update.message.chat_id
+    
+    user_message = update.message.caption
+        
+
+    if not user_message.startswith(("hey ares", "hi ares", "ares", "yo ares","hello ares","what's up ares")) or update.message.chat.type != 'private' :
+        return 
     chat_seesion = get_chat_history(chat_id)
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
@@ -505,7 +511,7 @@ def process_image(update: Update, context: CallbackContext) -> None:
     def handle_image():
         try:
             if update.message.photo:
-                user_message = update.message.caption if update.message.caption else ""
+                 if update.message.caption else ""
 
                 file_id = update.message.photo[-1].file_id
                 file = context.bot.get_file(file_id)
