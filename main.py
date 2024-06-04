@@ -894,12 +894,23 @@ def imagine(update: Update, context: CallbackContext):
       
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.FIND_LOCATION)
     try:
-      
+        logger.info(f"requesting for image for chatId:{chat_id}  prompt:{search}")
         x = create_image(search)
+        logger.info(f"image created successfully")
         context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
         
-        with open("image.jpg", 'wb') as f:
+        try:
+          # Attempt to open the file for writing in binary mode
+          with open("image.jpg", 'wb') as f:
+            # Write content to the file
             f.write(x)
+          logger.info("Content written to 'image.jpg' successfully.")
+        except Exception as e:
+           # Handle any exceptions that may occur
+           logger.error(f"Error writing to 'image.jpg': {e}")
+
+        # Now proceed with processing the file
+          
         caption = f"""
         prompt: {search}
 
@@ -911,7 +922,7 @@ def imagine(update: Update, context: CallbackContext):
         update.message.reply_photo("image.jpg",caption=caption,quote=True)
     except Exception as e:
         update.message.reply_text(f"error while generating image error : {e}")
-
+        logger.error(f"error while generating image error : {e}")
   
 def main() -> None:
     logger.info("Bot starting!")
