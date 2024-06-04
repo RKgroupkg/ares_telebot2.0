@@ -9,4 +9,3 @@ jsonpickle
 bing_image_downloader
 wikipedia
 requests
-base64
