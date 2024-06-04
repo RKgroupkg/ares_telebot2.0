@@ -938,6 +938,7 @@ def main() -> None:
 
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
+    dispatcher.add_handler(CommandHandler("imagine", imagine))
 
     
                                     
