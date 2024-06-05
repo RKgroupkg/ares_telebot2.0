@@ -509,8 +509,7 @@ def process_image(update: Update, context: CallbackContext) -> None:
         
 
 
-    if not user_message.startswith(("hey ares", "hi ares", "ares", "yo ares","hello ares","what's up ares")) or update.message.chat.type != 'private' :
-        return 
+    
     chat_seesion = get_chat_history(chat_id)
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
 
