@@ -1,6 +1,6 @@
 import logging,telegram
 from telegram import Update,ChatAction,InlineKeyboardMarkup, InlineKeyboardButton,ParseMode # version = 12.8
-from telegram.ext import Updater, MessageHandler, Filters, CallbackContext,CommandHandler,CallbackQueryHandler
+from telegram.ext import Updater, MessageHandler, Filters, CallbackContext,CommandHandler,CallbackQueryHandler,ErrorHandler
 import google.generativeai as genai
 import threading
 import textwrap
@@ -9,7 +9,10 @@ import os,json
 import format_html
 import time,datetime
 import config
+import html
+import traceback
 
+from search_engine_parser.core.engines.google import Search as GoogleSearch
 import wikipedia,requests
 from wikipedia.exceptions import DisambiguationError, PageError
 
@@ -28,6 +31,7 @@ app = firebase_admin.initialize_app(cred, {"databaseURL": "https://ares-rkbot-de
 PASSWORD = os.environ.get('password')
 
 chat_histories ={}
+DEVELOPER_CHAT_ID = 6258187891
 
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
@@ -348,7 +352,6 @@ def send_message(update: Update,message: str,format = True,parse_mode = "HTML") 
 
 
 
-
 def help_command(update: Update, context: CallbackContext) -> None:
   """Send a well-formatted help message """
 
@@ -376,7 +379,7 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
         chatID = update.message.chat_id
    
     try:
-        UserCloudeData =DB.user_exists(chatID)
+        UserCloudeData = DB.user_exists(chatID)
         if UserCloudeData:
             UserCloudeData['system_instruction']
             instruction = UserCloudeData['system_instruction']
@@ -502,7 +505,8 @@ def process_image(update: Update, context: CallbackContext) -> None:
     
     user_message = update.message.caption
         
-
+
+
     if not user_message.startswith(("hey ares", "hi ares", "ares", "yo ares","hello ares","what's up ares")) or update.message.chat.type != 'private' :
         return 
     chat_seesion = get_chat_history(chat_id)
@@ -931,6 +935,73 @@ def imagine(update: Update, context: CallbackContext):
     except Exception as e:
         update.message.reply_text(f"error while generating image error : {e}")
         logger.error(f"error while generating image error : {e}")
+
+def Google_search(update: Updater, context: CallbackContext) -> None:
+   chat_id = update.effective_chat.id
+   search = " ".join(context.args)
+   if not search:
+      update.message.reply_text(f"error 404 no query provided pls provide a search query")
+      return 
+
+   search_args = (search, 5)
+   gsearch = GoogleSearch()
+   gresults = gsearch.search(*search_args)
+   msg = ""
+   for i in range(len(gresults["links"])):
+        try:
+            title = gresults["titles"][i]
+            link = gresults["links"][i]
+            desc = gresults["descriptions"][i]
+            msg += f"❍[{title}]({link})\n**{desc}**\n\n"
+        except IndexError:
+            break  
+   update.message.reply_text(
+        "**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg, link_preview=False
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+def error_handler(update: Updater, context: CallbackContext) -> None:
+  """Logs the error and sends a notification to the developer using context."""
+  # Get essential details from context
+  logger.error("Exception while handling an update:", exc_info=context.error)
+ 
+  # traceback.format_exception returns the usual python message about an exception, but as a
+  # list of strings rather than a single string, so we have to join them together.
+  tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+  tb_string = "".join(tb_list)
+  # Build the message with some markup and additional information about what happened.
+  # You might need to add some logic to deal with messages longer than the 4096 character limit.
+  update_str = update.to_dict() if isinstance(update, Update) else str(update)
+  message = (
+        "An exception was raised while handling an update\n"
+        f"<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}"
+        "</pre>\n\n"
+        f"<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n"
+        f"<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n"
+        f"<pre>{html.escape(tb_string)}</pre>"
+    )
+  try:
+        context.bot.send_message(
+            chat_id=DEVELOPER_CHAT_ID, text=message, parse_mode=ParseMode.HTML
+        )
+  except Exception as e:
+        # Handle potential errors sending the notification (e.g., network issues)
+        logger.error(f"Failed to send error notification: {e}")
+
+
+
+
   
 def main() -> None:
     logger.info("Bot starting!")
@@ -958,6 +1029,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
     dispatcher.add_handler(CommandHandler("imagine", imagine))
+    dispatcher.add_handler(CommandHandler("google", Google_search))
 
     
                                     
@@ -972,6 +1044,8 @@ def main() -> None:
     # Register the ChangePrompt command handler
     dispatcher.add_handler(CommandHandler("clear_history", clear_history, pass_args=True))
     dispatcher.add_handler(CommandHandler("ChangePrompt", change_prompt, pass_args=True))
+
+    dispatcher.add_error_handler(error_handler)
 
 
 
