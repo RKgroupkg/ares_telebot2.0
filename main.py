@@ -32,6 +32,7 @@ PASSWORD = os.environ.get('password')
 
 chat_histories ={}
 DEVELOPER_CHAT_ID = 6258187891
+SUPPORT_CHAT_ID = -1002201688413
 
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
@@ -950,6 +951,7 @@ def Google_search(update: Update, context: CallbackContext) -> None:
         return 
 
     # Run the async function in the event loop
+    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     gresults = asyncio.run(async_google_search(search))
     
     msg = ""
@@ -963,9 +965,38 @@ def Google_search(update: Update, context: CallbackContext) -> None:
             break
     
     update.message.reply_text(
-        "**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg, link_preview=False
+        "**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg, link_preview=False,parse_mode='MarkdownV2'
     )
+  
+def bug(update: Update, context: CallbackContext) -> None:
+    chat_id = update.effective_chat.id
+    bugs = " ".join(context.args)
+    if not bugs:
+      update.message.reply_text(f"Type the bug or error you are facing")
+      return 
+    mention = (
+        "[" + update.message.from_user.first_name+ "](tg://user?id=" + str(update.message.from_user.id) + ")"
+    )
+    datetimes_fmt = "%d-%m-%Y"
+    datetimes = datetime.utcnow().strftime(datetimes_fmt)
+    bug_report = f"""
+**#ʙᴜɢ : ** **tg://user?id={DEVELOPER_CHAT_ID}**
 
+**ʀᴇᴩᴏʀᴛᴇᴅ ʙʏ : ** **{mention}**
+**ᴜsᴇʀ ɪᴅ : ** **{update.message.from_user.id}**
+**ᴄʜᴀᴛ : ** **{chat_id}**
+
+**ʙᴜɢ : ** **{bugs}**
+
+**ᴇᴠᴇɴᴛ sᴛᴀᴍᴩ : ** **{datetimes}**"""
+    context.bot.send_message(
+            chat_id=SUPPORT_CHAT_ID, text=bug_report, parse_mode='MarkdownV2'
+        )
+    update.message.reply_text(
+        f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join it for extra help and direct contact !",parse_mode='MarkdownV2'
+    )
+    
+  
 
 
 
@@ -980,6 +1011,7 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
   """Logs the error and sends a notification to the developer using context."""
   # Get essential details from context
   logger.error("Exception while handling an update:", exc_info=context.error)
+  
  
   # traceback.format_exception returns the usual python message about an exception, but as a
   # list of strings rather than a single string, so we have to join them together.
@@ -1025,6 +1057,7 @@ def main() -> None:
 
     # Register the help command handler
     dispatcher.add_handler(CommandHandler("help", help_command))
+    dispatcher.add_handler(CommandHandler("bug", bug))
     dispatcher.add_handler(CommandHandler("info", INFO))
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CallbackQueryHandler(button))
