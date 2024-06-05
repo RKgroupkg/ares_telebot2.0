@@ -965,7 +965,7 @@ def Google_search(update: Update, context: CallbackContext) -> None:
             break
     
     update.message.reply_text(
-        "**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg, link_preview=False,parse_mode='MarkdownV2'
+        format_html.escape("**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg), link_preview=False,parse_mode='MarkdownV2'
     )
   
 def bug(update: Update, context: CallbackContext) -> None:
@@ -978,7 +978,7 @@ def bug(update: Update, context: CallbackContext) -> None:
         "[" + update.message.from_user.first_name+ "](tg://user?id=" + str(update.message.from_user.id) + ")"
     )
     datetimes_fmt = "%d-%m-%Y"
-    datetimes = datetime.utcnow().strftime(datetimes_fmt)
+    datetimes = datetime.datetime.utcnow().strftime(datetimes_fmt)
     bug_report = f"""
 **#ʙᴜɢ : ** **tg://user?id={DEVELOPER_CHAT_ID}**
 
