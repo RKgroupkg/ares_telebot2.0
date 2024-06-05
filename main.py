@@ -11,7 +11,7 @@ import time,datetime
 import config
 import html
 import traceback
-
+import asyncio
 from search_engine_parser.core.engines.google import Search as GoogleSearch
 import wikipedia,requests
 from wikipedia.exceptions import DisambiguationError, PageError
@@ -271,8 +271,9 @@ def process_message(update: Update, context: CallbackContext) -> None:
         chat_id = update.message.chat_id
         if update.message.reply_to_message:
             reply_to_bot = (
-            update.message.reply_to_message
-            and update.message.reply_to_message.from_user.is_bot
+              update.message.reply_to_message
+              and update.message.reply_to_message.from_user.id == context.bot.id
+    )
         )
         else:
             reply_to_bot = False
@@ -936,30 +937,35 @@ def imagine(update: Update, context: CallbackContext):
         update.message.reply_text(f"error while generating image error : {e}")
         logger.error(f"error while generating image error : {e}")
 
-def Google_search(update: Updater, context: CallbackContext) -> None:
-   chat_id = update.effective_chat.id
-   search = " ".join(context.args)
-   if not search:
-      update.message.reply_text(f"error 404 no query provided pls provide a search query")
-      return 
+async def async_google_search(search: str):
+    search_args = (search, 5)
+    gsearch = GoogleSearch()
+    gresults = await gsearch.search(*search_args)
+    return gresults
 
-   search_args = (search, 5)
-   gsearch = GoogleSearch()
-   gresults = gsearch.search(*search_args)
-   msg = ""
-   for i in range(len(gresults["links"])):
+def Google_search(update: Update, context: CallbackContext) -> None:
+    chat_id = update.effective_chat.id
+    search = " ".join(context.args)
+    if not search:
+        update.message.reply_text(f"error 404 no query provided pls provide a search query")
+        return 
+
+    # Run the async function in the event loop
+    gresults = asyncio.run(async_google_search(search))
+    
+    msg = ""
+    for i in range(len(gresults["links"])):
         try:
             title = gresults["titles"][i]
             link = gresults["links"][i]
             desc = gresults["descriptions"][i]
             msg += f"❍[{title}]({link})\n**{desc}**\n\n"
         except IndexError:
-            break  
-   update.message.reply_text(
+            break
+    
+    update.message.reply_text(
         "**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg, link_preview=False
     )
-
-
 
 
 
