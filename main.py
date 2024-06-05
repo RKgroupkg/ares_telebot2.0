@@ -32,6 +32,7 @@ PASSWORD = os.environ.get('password')
 
 chat_histories ={}
 DEVELOPER_CHAT_ID = 6258187891
+ADMIN_CHAT_ID = -1002182025326
 SUPPORT_CHAT_ID = -1002201688413
 
 api_key = os.environ.get('gemnie_api')
@@ -997,6 +998,9 @@ def bug(update: Update, context: CallbackContext) -> None:
     context.bot.send_message(
             chat_id=SUPPORT_CHAT_ID, text=format_html.escape(bug_report), parse_mode='MarkdownV2'
         )
+    context.bot.send_message(
+            chat_id=ADMIN_CHAT_ID, text=format_html.escape(bug_report), parse_mode='MarkdownV2'
+        )
     update.message.reply_text(
         f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join it for extra help and direct contact ",parse_mode='MarkdownV2'
     )
@@ -1035,7 +1039,7 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
     )
   try:
         context.bot.send_message(
-            chat_id=DEVELOPER_CHAT_ID, text=message, parse_mode=ParseMode.HTML
+            chat_id=ADMIN_CHAT_ID, text=message, parse_mode=ParseMode.HTML
         )
   except Exception as e:
         # Handle potential errors sending the notification (e.g., network issues)
