@@ -998,7 +998,7 @@ def bug(update: Update, context: CallbackContext) -> None:
             chat_id=SUPPORT_CHAT_ID, text=format_html.escape(bug_report), parse_mode='MarkdownV2'
         )
     update.message.reply_text(
-        f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join it for extra help and direct contact !",parse_mode='MarkdownV2'
+        f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join it for extra help and direct contact ",parse_mode='MarkdownV2'
     )
     
   
