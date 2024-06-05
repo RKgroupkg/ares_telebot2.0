@@ -952,21 +952,26 @@ def Google_search(update: Update, context: CallbackContext) -> None:
 
     # Run the async function in the event loop
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-    gresults = asyncio.run(async_google_search(search))
-    
-    msg = ""
-    for i in range(len(gresults["links"])):
-        try:
-            title = gresults["titles"][i]
-            link = gresults["links"][i]
-            desc = gresults["descriptions"][i]
-            msg += f"❍[{title}]({link})\n**{desc}**\n\n"
-        except IndexError:
-            break
-    
-    update.message.reply_text(
-        format_html.escape("**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg), link_preview=False,parse_mode='MarkdownV2'
-    )
+    try:
+          gresults = asyncio.run(async_google_search(search))
+          
+          msg = ""
+          for i in range(len(gresults["links"])):
+              try:
+                  title = gresults["titles"][i]
+                  link = gresults["links"][i]
+                  desc = gresults["descriptions"][i]
+                  msg += f"❍[{title}]({link})\n**{desc}**\n\n"
+              except IndexError:
+                  break
+          
+          update.message.reply_text(
+              format_html.escape("**Search Query:**\n`" + search + "`\n\n**Results:**\n" + msg), link_preview=False,parse_mode='MarkdownV2'
+          )
+    except Exception as e:
+        # Handle potential errors sending the result (e.g., network issues)
+         update.message.reply_text(f"Sorry can't send the result error:{e}")
+         logger.error(f"Failed to send google search result on query:{search} error : {e}")
   
 def bug(update: Update, context: CallbackContext) -> None:
     chat_id = update.effective_chat.id
@@ -990,7 +995,7 @@ def bug(update: Update, context: CallbackContext) -> None:
 
 **ᴇᴠᴇɴᴛ sᴛᴀᴍᴩ : ** **{datetimes}**"""
     context.bot.send_message(
-            chat_id=SUPPORT_CHAT_ID, text=bug_report, parse_mode='MarkdownV2'
+            chat_id=SUPPORT_CHAT_ID, text=format_html.escape(bug_report), parse_mode='MarkdownV2'
         )
     update.message.reply_text(
         f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join it for extra help and direct contact !",parse_mode='MarkdownV2'
