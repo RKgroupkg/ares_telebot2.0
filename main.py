@@ -272,9 +272,8 @@ def process_message(update: Update, context: CallbackContext) -> None:
         if update.message.reply_to_message:
             reply_to_bot = (
               update.message.reply_to_message
-              and update.message.reply_to_message.from_user.id == context.bot.id
-    )
-        )
+              and update.message.reply_to_message.from_user.id == context.bot.id )
+        
         else:
             reply_to_bot = False
 
