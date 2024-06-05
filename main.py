@@ -12,7 +12,7 @@ import config
 import html
 import traceback
 import asyncio
-from search_engine_parser.core.engines.google import Search as GoogleSearch
+from search_engine_parser import GoogleSearch
 import wikipedia,requests
 from wikipedia.exceptions import DisambiguationError, PageError
 
@@ -939,7 +939,7 @@ def imagine(update: Update, context: CallbackContext):
 async def async_google_search(search: str):
     search_args = (search, 5)
     gsearch = GoogleSearch()
-    gresults = await gsearch.search(*search_args)
+    gresults = await gsearch.async_search(*search_args)
     return gresults
 
 def Google_search(update: Update, context: CallbackContext) -> None:
