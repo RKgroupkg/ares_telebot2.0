@@ -22,6 +22,7 @@ from bing_image_downloader import downloader
 from utils.FireDB import FireBaseDB
 from utils import escape
 import shutil
+import jsonpickle
 
 from config import (
     DEVELOPER_CHAT_ID,
