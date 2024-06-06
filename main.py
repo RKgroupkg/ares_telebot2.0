@@ -180,7 +180,7 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
                 update.message.reply_text(f"The prompt has been successfully changed to: <b>'{new_promt}'</b>", parse_mode='HTML')
                 DB.Update_instruction(chat_id,new_promt)
         DB.chat_history_add(chat_id,[])
-        command_logger.log_command(user_id,'/changeprompt')
+        command_logger.log_command(update.effective_user.id,'/changeprompt')
     else:
             update.message.reply_text(f"Error ! un sufficent info provided", parse_mode='HTML')
     
@@ -298,7 +298,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
         return
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
   update.message.reply_text(DB.info(update.message.chat_id), parse_mode='HTML', disable_web_page_preview=True)
-  command_logger.log_command(user_id,'/info')
+  command_logger.log_command(update.effective_user.id,'/info')
   
 
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
@@ -343,7 +343,7 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/refresh')
+    command_logger.log_command(update.effective_user.id,'/refresh')
     logger.info(f"REFRESH command asked by :{update.message.from_user.username}")
     args = context.args
     if args:
@@ -387,7 +387,7 @@ def start(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/start')
+    command_logger.log_command(update.effective_user.id,'/start')
     user = update.message.from_user
     username = user.first_name if user.first_name else user.username if user.username else "there"
 
@@ -454,7 +454,7 @@ def history(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/history')
+    command_logger.log_command(update.effective_user.id,'/history')
     args = context.args
     chat_id = update.message.chat_id
 
@@ -799,7 +799,7 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/image')
+    command_logger.log_command(update.effective_user.id,'/image')
     chat_id = update.effective_chat.id
     query_ = " ".join(context.args)
     logger.info(f"chatId:{chat_id} used /image command with this query:{query_}")
@@ -839,7 +839,7 @@ def wiki(update: Update, context: CallbackContext):
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/wiki')
+    command_logger.log_command(update.effective_user.id,'/wiki')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if search:
@@ -921,7 +921,7 @@ def imagine(update: Update, context: CallbackContext):
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/imagine')
+    command_logger.log_command(update.effective_user.id,'/imagine')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
@@ -974,7 +974,7 @@ def Google_search(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
         return
-    command_logger.log_command(user_id,'/google')
+    command_logger.log_command(update.effective_user.id,'/google')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
