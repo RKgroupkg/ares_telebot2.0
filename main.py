@@ -1256,7 +1256,13 @@ def unblock_user_command(update: Update, context: CallbackContext) -> None:
     DB.unblock_user(user_id_to_unblock)
     update.message.reply_text(f"User {user_id_to_unblock} has been unblocked.", parse_mode=ParseMode.HTML)
 
-
+def all_blocked_users(update: Update, context: CallbackContext) -> None:
+  """list of all blocked users"""
+  if update.message.chat_id != ADMIN_CHAT_ID:
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        return
+  blocked_users = DB.blocked_users_cache
+  update.message.reply_text(f"User that are unblocked : {blocked_users}", parse_mode=ParseMode.HTML)
 
 def main() -> None:
     logger.info("Bot starting!")
