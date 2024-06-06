@@ -8,7 +8,6 @@ import textwrap
 import PIL.Image
 import os,json
 import time,datetime
-import config
 import html
 import psutil
 import traceback
@@ -24,13 +23,21 @@ from utils.FireDB import FireBaseDB
 from utils import escape
 import shutil
 
+from config import (
+    DEVELOPER_CHAT_ID,
+    ADMIN_CHAT_ID,
+    SUPPORT_CHAT_ID,
+    system_instruction,
+    generation_config,
+    help_text,
+    safety_settings
+)
+
 
 PASSWORD = os.environ.get('password')
 
 chat_histories ={}
-DEVELOPER_CHAT_ID = 6258187891
-ADMIN_CHAT_ID = -1002182025326
-SUPPORT_CHAT_ID = -1002201688413
+
 
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
@@ -38,9 +45,9 @@ telegram_bot_token = os.environ.get('telegram_api')
 
 model = genai.GenerativeModel(
   model_name="gemini-1.5-pro-latest",
-  safety_settings=config.safety_settings,
-  generation_config=config.generation_config,
-  system_instruction=config.system_instruction,)
+  safety_settings=safety_settings,
+  generation_config=generation_config,
+  system_instruction= system_instruction)
 
 
     
@@ -68,12 +75,12 @@ def get_chat_history(chat_id):
             instruction = userData['system_instruction']
 
             if instruction =='default':
-                instruction = config.system_instruction            
+                instruction = system_instruction            
             
             model_temp = genai.GenerativeModel(
                 model_name="gemini-1.5-pro-latest",
-                safety_settings=config.safety_settings,
-                generation_config=config.generation_config,
+                safety_settings=safety_settings,
+                generation_config=generation_config,
                 system_instruction=instruction
             )
             history=jsonpickle.decode(userData['chat_session'])   # decode history and then store
@@ -159,8 +166,8 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
         else:
                 model_temp = genai.GenerativeModel(
                     model_name="gemini-1.5-pro-latest",
-                    safety_settings=config.safety_settings,
-                    generation_config=config.generation_config,
+                    safety_settings=safety_settings,
+                    generation_config=generation_config,
                     system_instruction=new_promt )
                 chat_histories[chat_id] = model_temp.start_chat(history=[])
     
@@ -271,7 +278,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
           update.message.reply_text(f"You are blocked sorry you message are being ignored contact the owner for more details", parse_mode='HTML', disable_web_page_preview=True)
           return
   logger.info(f"help command asked by :{update.message.from_user.username}")
-  update.message.reply_text(config.help_text, parse_mode='HTML', disable_web_page_preview=True)
+  update.message.reply_text(help_text, parse_mode='HTML', disable_web_page_preview=True)
 
 def INFO(update: Update, context: CallbackContext) -> None:
   """Send a well-formatted info message """
@@ -296,12 +303,12 @@ def GB_REFRESH(update: Update, context: CallbackContext) -> None:
                 instruction = userData['system_instruction']
     
                 if instruction =='default':
-                    instruction = config.system_instruction            
+                    instruction = system_instruction            
                 
                 model_temp = genai.GenerativeModel(
                     model_name="gemini-1.5-pro-latest",
-                    safety_settings=config.safety_settings,
-                    generation_config=config.generation_config,
+                    safety_settings=safety_settings,
+                    generation_config=generation_config,
                     system_instruction=instruction
                 )
                 history=jsonpickle.decode(userData['chat_session'])   # decode history and then store
@@ -339,15 +346,15 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
             UserCloudeData['system_instruction']
             instruction = UserCloudeData['system_instruction']
             if instruction =='default':
-                instruction_local = config.system_instruction
+                instruction_local = system_instruction
             else:
                 instruction_local = instruction
 
 
             model_temp = genai.GenerativeModel(
                         model_name="gemini-1.5-pro-latest",
-                        safety_settings=config.safety_settings,
-                        generation_config=config.generation_config,
+                        safety_settings=safety_settings,
+                        generation_config=generation_config,
                         system_instruction= instruction_local)
             chat_histories[chatID] = model_temp.start_chat(history=jsonpickle.decode(UserCloudeData['chat_session']))
             update.message.reply_text(f"<b> Succesfully updated your info({chatID}) from cloud </b> \n\nPrompt : <i>{instruction}</i>\n\n chat History also updated!", parse_mode='HTML')
@@ -380,7 +387,7 @@ def button(update: Update, context: CallbackContext) -> None:
     query.answer()
 
     if query.data == 'help':
-        help_message = config.help_text
+        help_message = help_text
         query.edit_message_text(text=help_message, parse_mode='HTML')
     elif query.data == 'contact':
         contact_message = "You can contact the owner at @Rkgroup5316. or join https://t.me/AresChatBotAi for info and bug reports ."
