@@ -617,8 +617,10 @@ def process_image(update: Update, context: CallbackContext) -> None:
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
     chat_id = update.message.chat_id
-    
+    chat_type = message.chat.type
     user_message = update.message.caption
+    if chat_type != 'private' and not user_message.startswith(("hey ares", "hi ares", "ares", "yo ares","hello ares","what's up ares")) :
+      return
         
 
 
