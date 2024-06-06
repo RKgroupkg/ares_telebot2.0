@@ -59,6 +59,8 @@ class FireBaseDB:
     def __init__(self):
         self.db = db.reference("/users_sessions")
         self.INFO_DB = db.reference("/Blocked_user")
+        self.blocked_users_cache = set()
+        self._load_blocked_users()
     
     def user_exists(self,userId):
 
@@ -154,7 +156,37 @@ Prompt :          {user_data["system_instruction"]}
             logger.error(f"Error retrieving usernames: {e}")
             return []
 
+    def _load_blocked_users(self):
+        """Load blocked users from the cloud database into the local cache."""
+        try:
+            blocked_users = self.INFO_DB.get()
+            if blocked_users:
+                self.blocked_users_cache = set(blocked_users.keys())
+            logger.info("Blocked users loaded into cache.")
+        except Exception as e:
+            logger.error(f"Error loading blocked users: {e}")
 
+    def block_user(self, userId):
+        """Block a user by adding to both the cloud database and local cache."""
+        try:
+            self.INFO_DB.update({userId: True})
+            self.blocked_users_cache.add(userId)
+            logger.info(f"User {userId} has been blocked.")
+        except Exception as e:
+            logger.error(f"Error blocking user {userId}: {e}")
+
+    def unblock_user(self, userId):
+        """Unblock a user by removing from both the cloud database and local cache."""
+        try:
+            self.INFO_DB.child(userId).delete()
+            self.blocked_users_cache.discard(userId)
+            logger.info(f"User {userId} has been unblocked.")
+        except Exception as e:
+            logger.error(f"Error unblocking user {userId}: {e}")
+
+    def is_user_blocked(self, userId):
+        """Check if a user is blocked by looking into the local cache."""
+        return userId in self.blocked_users_cache
 
     
      
@@ -254,6 +286,9 @@ def generate_response(chat_id, input_text: str) -> str:
 
 def change_prompt(update: Update, context: CallbackContext) -> None:
     """Change the prompt for generating responses."""
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
     chat_id = update.message.chat_id
     new_promt = " ".join(context.args)
     logger.info(f"chatId({chat_id}) changed its Promt to :'{new_promt}'")
@@ -284,7 +319,11 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
 
 
 def process_message(update: Update, context: CallbackContext) -> None:
+        
         if not update.message:
+          return
+        if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
         chat_id = update.message.chat_id
         if update.message.reply_to_message:
@@ -372,12 +411,18 @@ def send_message(update: Update,message: str,format = True,parse_mode = "HTML") 
 
 def help_command(update: Update, context: CallbackContext) -> None:
   """Send a well-formatted help message """
-
+  if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          update.message.reply_text(f"You are blocked sorry you message are being ignored contact the owner for more details", parse_mode='HTML', disable_web_page_preview=True)
+          return
   logger.info(f"help command asked by :{update.message.from_user.username}")
   update.message.reply_text(config.help_text, parse_mode='HTML', disable_web_page_preview=True)
 
 def INFO(update: Update, context: CallbackContext) -> None:
   """Send a well-formatted info message """
+  if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
 
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
   update.message.reply_text(DB.info(update.message.chat_id), parse_mode='HTML', disable_web_page_preview=True)
@@ -418,6 +463,9 @@ def GB_REFRESH(update: Update, context: CallbackContext) -> None:
 
 def REFRESH(update: Update, context: CallbackContext) -> None:
     """retrive data from cloud and updates current data"""
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
 
     logger.info(f"REFRESH command asked by :{update.message.from_user.username}")
     args = context.args
@@ -456,6 +504,9 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
         logger.error(f"An error occurred while clearing the chat history: {e}")
 
 def start(update: Update, context: CallbackContext) -> None:
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
     user = update.message.from_user
     username = user.first_name if user.first_name else user.username if user.username else "there"
 
@@ -482,6 +533,9 @@ def button(update: Update, context: CallbackContext) -> None:
 
 def clear_history(update: Update, context: CallbackContext) -> None:
     """Clear the chat history for the current chat."""
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
     args = context.args
     if args:
           if update.message.chat_id == ADMIN_CHAT_ID:
@@ -513,6 +567,9 @@ def clear_history(update: Update, context: CallbackContext) -> None:
 
 
 def history(update: Update, context: CallbackContext) -> None:
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
     args = context.args
     chat_id = update.message.chat_id
 
@@ -555,6 +612,9 @@ def format_chat_history(chat_history):
 
 
 def process_image(update: Update, context: CallbackContext) -> None:
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+          return
     chat_id = update.message.chat_id
     
     user_message = update.message.caption
@@ -607,6 +667,9 @@ def process_image(update: Update, context: CallbackContext) -> None:
     threading.Thread(target=handle_image).start()
 
 def Token(update: Update, context: CallbackContext) -> None:
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
     args = context.args
     chat_id = update.message.chat_id
 
@@ -665,6 +728,9 @@ def session_info_command(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(session_message, parse_mode='HTML')
 
 def media_handler(update: Update, context: CallbackContext) -> None:
+        if DB.is_user_blocked(str(update.message.from_user.id)):
+            logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+            return
         message = update.message
         if message.video:
             media = message.video
@@ -834,7 +900,9 @@ def download_images(query, limit=4, output_dir="images"):
 
 def image_command_handler(update: Update, context: CallbackContext) -> None:
     """Handles the `/image` command to download and send images."""
-
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
     chat_id = update.effective_chat.id
     query_ = " ".join(context.args)
     logger.info(f"chatId:{chat_id} used /image command with this query:{query_}")
@@ -868,6 +936,9 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
     threading.Thread(target=image_pros, args=(update,context,query_)).start()
   
 def wiki(update: Update, context: CallbackContext):
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if search:
@@ -943,6 +1014,9 @@ def create_image(prompt: str) -> bytes:
             raise Exception("Error:", response.status_code)
           
 def imagine(update: Update, context: CallbackContext):
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
@@ -989,6 +1063,9 @@ async def async_google_search(search: str):
     return gresults
 
 def Google_search(update: Update, context: CallbackContext) -> None:
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
@@ -1019,6 +1096,10 @@ def Google_search(update: Update, context: CallbackContext) -> None:
          logger.error(f"Failed to send google search result on query:{search} error : {e}")
   
 def bug(update: Update, context: CallbackContext) -> None:
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
+      
     chat_id = update.effective_chat.id
     bugs = " ".join(context.args)
     if not bugs:
@@ -1146,7 +1227,37 @@ def specific_broadcast(update: Update, context: CallbackContext) -> None:
             logger.info(f"User {chat_id} has blocked the bot.")
         else:
             update.message.reply_text(f"Error sending message to chat ID {chat_id}: {e}", parse_mode=ParseMode.HTML)
-          
+
+def block_user_command(update: Update, context: CallbackContext) -> None:
+    """Block a user."""
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        return
+
+    if len(context.args) != 1:
+        update.message.reply_text("Usage: /block <user_id>", parse_mode=ParseMode.HTML)
+        return
+
+    user_id_to_block = context.args[0]
+    DB.block_user(user_id_to_block)
+    update.message.reply_text(f"User {user_id_to_block} has been blocked.", parse_mode=ParseMode.HTML)
+
+def unblock_user_command(update: Update, context: CallbackContext) -> None:
+    """Unblock a user."""
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        return
+
+    if len(context.args) != 1:
+        update.message.reply_text("Usage: /unblock <user_id>", parse_mode=ParseMode.HTML)
+        return
+
+    user_id_to_unblock = context.args[0]
+    DB.unblock_user(user_id_to_unblock)
+    update.message.reply_text(f"User {user_id_to_unblock} has been unblocked.", parse_mode=ParseMode.HTML)
+
+
+
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -1173,7 +1284,9 @@ def main() -> None:
     # ADMNIN command 
     dispatcher.add_handler(CommandHandler("gb_refresh", GB_REFRESH))
     dispatcher.add_handler(CommandHandler("gb_broad_cast", gb_broadcast))   
-    dispatcher.add_handler(CommandHandler("specific_broadcast", specific_broadcast))   
+    dispatcher.add_handler(CommandHandler("specific_broadcast", specific_broadcast))
+    dispatcher.add_handler(CommandHandler("block", block_user_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("unblock", unblock_user_command, pass_args=True))
     
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
