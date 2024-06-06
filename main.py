@@ -1295,6 +1295,6 @@ def main() -> None:
 
 if __name__ == '__main__':
     DB = FireBaseDB()
-    command_limit =rate_limit.CommandLogger()  # safety limit 
+    command_logger =rate_limit.CommandLogger()  # safety limit 
     keep_alive()
     main()
