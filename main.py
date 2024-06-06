@@ -20,7 +20,7 @@ from keep_alive import keep_alive
 from logs import logger
 from bing_image_downloader import downloader 
 from utils.FireDB import FireBaseDB
-from utils import escape
+from utils import escape,rate_limit
 import shutil
 import jsonpickle
 
@@ -152,11 +152,16 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
+
+    
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+        
     chat_id = update.message.chat_id
     new_promt = " ".join(context.args)
     logger.info(f"chatId({chat_id}) changed its Promt to :'{new_promt}'")
     if new_promt :
-        print(f"arg in lower case :{context.args[0].lower()} is it command? :{context.args[0].lower() == 'd'} ")
         if  context.args[0].lower() == 'd' or context.args[0].lower() == 'default' or context.args[0].lower() == 'orignal':
         
            chat_histories[chat_id] = model.start_chat(history=[] )
@@ -175,8 +180,10 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
                 update.message.reply_text(f"The prompt has been successfully changed to: <b>'{new_promt}'</b>", parse_mode='HTML')
                 DB.Update_instruction(chat_id,new_promt)
         DB.chat_history_add(chat_id,[])
+        command_logger.log_command(user_id,'/changeprompt')
     else:
             update.message.reply_text(f"Error ! un sufficent info provided", parse_mode='HTML')
+    
 
 
 
@@ -286,9 +293,13 @@ def INFO(update: Update, context: CallbackContext) -> None:
   if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-
+  if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
   update.message.reply_text(DB.info(update.message.chat_id), parse_mode='HTML', disable_web_page_preview=True)
+  command_logger.log_command(user_id,'/info')
+  
 
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
   """REFRESH ALL USERS FROM CLOUD"""
@@ -329,7 +340,10 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/refresh')
     logger.info(f"REFRESH command asked by :{update.message.from_user.username}")
     args = context.args
     if args:
@@ -370,6 +384,10 @@ def start(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/start')
     user = update.message.from_user
     username = user.first_name if user.first_name else user.username if user.username else "there"
 
@@ -433,6 +451,10 @@ def history(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/history')
     args = context.args
     chat_id = update.message.chat_id
 
@@ -774,6 +796,10 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/image')
     chat_id = update.effective_chat.id
     query_ = " ".join(context.args)
     logger.info(f"chatId:{chat_id} used /image command with this query:{query_}")
@@ -810,6 +836,10 @@ def wiki(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/wiki')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if search:
@@ -888,6 +918,10 @@ def imagine(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/imagine')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
@@ -937,6 +971,10 @@ def Google_search(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        return
+    command_logger.log_command(user_id,'/google')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
@@ -1257,5 +1295,6 @@ def main() -> None:
 
 if __name__ == '__main__':
     DB = FireBaseDB()
+    command_limit =rate_limit.CommandLogger()  # safety limit 
     keep_alive()
     main()
