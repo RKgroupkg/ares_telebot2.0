@@ -1120,7 +1120,33 @@ def gb_broadcast(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Broadcast complete.", parse_mode=ParseMode.HTML)
     else:
         update.message.reply_text("No users found in the cloud data.", parse_mode=ParseMode.HTML)
-  
+
+
+def specific_broadcast(update: Update, context: CallbackContext) -> None:
+    """Broadcast a message to a specific user."""
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        return
+
+    if len(context.args) < 2:
+        update.message.reply_text("Usage: /specific_broadcast (chat_id) (message)", parse_mode=ParseMode.HTML)
+        return
+
+    chat_id = context.args[0]
+    message_to_broadcast = ' '.join(context.args[1:])
+
+    try:
+        context.bot.send_message(chat_id=chat_id, text=message_to_broadcast, parse_mode=ParseMode.HTML)
+        update.message.reply_text(f"Message sent to chat ID {chat_id}.", parse_mode=ParseMode.HTML)
+        logger.info(f"Message sent to chat ID {chat_id}.")
+    except Exception as e:
+        logger.error(f"Error sending message to chat ID {chat_id}: {e}")
+        if "bot was blocked by the user" in str(e):
+            update.message.reply_text(f"User {chat_id} has blocked the bot.", parse_mode=ParseMode.HTML)
+            logger.info(f"User {chat_id} has blocked the bot.")
+        else:
+            update.message.reply_text(f"Error sending message to chat ID {chat_id}: {e}", parse_mode=ParseMode.HTML)
+          
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -1144,23 +1170,24 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(button))
     dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
-    
+    # ADMNIN command 
     dispatcher.add_handler(CommandHandler("gb_refresh", GB_REFRESH))
     dispatcher.add_handler(CommandHandler("gb_broad_cast", gb_broadcast))   
-
+    dispatcher.add_handler(CommandHandler("specific_broadcast", specific_broadcast))   
+    
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
     dispatcher.add_handler(CommandHandler("imagine", imagine))
     dispatcher.add_handler(CommandHandler("google", Google_search))
+    dispatcher.add_handler(CommandHandler("session", session_command))
+    dispatcher.add_handler(CommandHandler("session_info", session_info_command))
+    dispatcher.add_handler(CommandHandler("cid_info", extract_chat_info))
 
     
                                     
 
     # Register the admin/info command handler
     dispatcher.add_handler(CommandHandler("token", Token))
-    dispatcher.add_handler(CommandHandler("session", session_command))
-    dispatcher.add_handler(CommandHandler("session_info", session_info_command))
-    dispatcher.add_handler(CommandHandler("cid_info", extract_chat_info))
 
 
     # Register the ChangePrompt command handler
