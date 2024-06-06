@@ -1,5 +1,6 @@
 import logging,telegram
 from telegram import Update,ChatAction,InlineKeyboardMarkup, InlineKeyboardButton,ParseMode # version = 12.8
+from telegram.error import Conflict
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext,CommandHandler,CallbackQueryHandler
 import google.generativeai as genai
 import threading
@@ -1127,7 +1128,7 @@ def bug(update: Update, context: CallbackContext) -> None:
             chat_id=ADMIN_CHAT_ID, text=format_html.escape(bug_report), parse_mode='MarkdownV2'
         )
     update.message.reply_text(
-        f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join it for extra help and direct contact ",parse_mode='MarkdownV2'
+        f"*ʙᴜɢ ʀᴇᴩᴏʀᴛ* : **{bugs}** \n\n » ʙᴜɢ sᴜᴄᴄᴇssғᴜʟʟʏ ʀᴇᴩᴏʀᴛᴇᴅ  Join the support group for extra help and direct contact ",parse_mode='MarkdownV2'
     )
     
   
@@ -1143,6 +1144,11 @@ def bug(update: Update, context: CallbackContext) -> None:
 
 def error_handler(update: Updater, context: CallbackContext) -> None:
   """Logs the error and sends a notification to the developer using context."""
+
+   if type(context.error) == Conflict:
+        logger.warning("Conflict error occurred, not sending notification.")
+        return  # Exit the function without sending a notification
+    
   # Get essential details from context
   logger.error("Exception while handling an update:", exc_info=context.error)
   
