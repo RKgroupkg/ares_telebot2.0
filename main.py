@@ -1144,8 +1144,9 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(button))
     dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
+    
     dispatcher.add_handler(CommandHandler("gb_refresh", GB_REFRESH))
-       
+    dispatcher.add_handler(CommandHandler("gb_broad_cast", gb_broadcast))   
 
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
