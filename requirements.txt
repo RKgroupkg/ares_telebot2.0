@@ -10,3 +10,4 @@ bing_image_downloader
 wikipedia
 requests
 search-engine-parser
+psutil
