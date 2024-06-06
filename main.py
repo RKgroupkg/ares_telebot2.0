@@ -139,6 +139,20 @@ Prompt :          {user_data["system_instruction"]}
 
     '''
             return message
+    def get_usernames(self):
+        """Retrieve all usernames from the users_sessions node in Firebase Realtime Database."""
+        try:
+            users_sessions = self.db.get()
+            if users_sessions:
+                usernames = list(users_sessions.keys())
+                logger.info(f"Usernames retrieved successfully: {usernames}")
+                return usernames
+            else:
+                logger.info("No user sessions found.")
+                return []
+        except Exception as e:
+            logger.error(f"Error retrieving usernames: {e}")
+            return []
 
 
 
@@ -191,6 +205,8 @@ def get_chat_history(chat_id):
     except Exception as e:
         # Handle errors during cloud data retrieval
         logger.error(f"Error retrieving chat history for chat_id: {chat_id}, Error: {e}")
+
+
 
 
 
@@ -366,6 +382,40 @@ def INFO(update: Update, context: CallbackContext) -> None:
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
   update.message.reply_text(DB.info(update.message.chat_id), parse_mode='HTML', disable_web_page_preview=True)
 
+def GB_REFRESH(update: Update, context: CallbackContext) -> None:
+  """REFRESH ALL USERS FROM CLOUD"""
+  if update.message.chat_id != ADMIN_CHAT_ID:  
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        return 
+  users_id = DB.get_usernames()
+  if users_id:
+    update.message.reply_text("Refreshing....", parse_mode='HTML')
+    for chat_id in users_id:
+        userData = DB.user_exists(chat_id)
+        if userData:
+                instruction = userData['system_instruction']
+    
+                if instruction =='default':
+                    instruction = config.system_instruction            
+                
+                model_temp = genai.GenerativeModel(
+                    model_name="gemini-1.5-pro-latest",
+                    safety_settings=config.safety_settings,
+                    generation_config=config.generation_config,
+                    system_instruction=instruction
+                )
+                history=jsonpickle.decode(userData['chat_session'])   # decode history and then store
+                chat_histories[chat_id] = model_temp.start_chat(history=history )
+                logger.info(f"Chat id:{chat_id} Refreshed!")
+        else:
+          update.message.reply_text(f"Some things is very weird with chatId:({chat_id}) the chat id existed on cloud but function did not get the id! ", parse_mode='HTML')
+    update.message.reply_text(f"<b> SUCCESSFULLY REFRESHED ALL THE DATA CHATID: <code>{users_id}</code></b>", parse_mode='HTML')
+      
+  else:
+    update.message.reply_text("Cloud data is blank", parse_mode='HTML')
+  
+
+
 def REFRESH(update: Update, context: CallbackContext) -> None:
     """retrive data from cloud and updates current data"""
 
@@ -405,8 +455,6 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(f"An error occurred while clearing the chat history: {e}")
         logger.error(f"An error occurred while clearing the chat history: {e}")
 
-
-  
 def start(update: Update, context: CallbackContext) -> None:
     user = update.message.from_user
     username = user.first_name if user.first_name else user.username if user.username else "there"
@@ -436,13 +484,17 @@ def clear_history(update: Update, context: CallbackContext) -> None:
     """Clear the chat history for the current chat."""
     args = context.args
     if args:
-            # If argument is provided, check if it's a valid chat ID
-            try:
-                chat_id = int(args[0])
-                chat_id = args[0] # so it remains str 
-            except ValueError:
-                update.message.reply_text("Invalid chat ID. Please provide a valid integer ID.", parse_mode='HTML')
-                return
+          if update.message.chat_id == ADMIN_CHAT_ID:
+              # If argument is provided, check if it's a valid chat ID
+              try:
+                  chat_id = int(args[0])
+                  chat_id = args[0] # so it remains str 
+              except ValueError:
+                  update.message.reply_text("Invalid chat ID. Please provide a valid integer ID.", parse_mode='HTML')
+                  return
+          else:
+            update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+            
     else: 
         chat_id = update.message.chat_id
 
@@ -586,15 +638,11 @@ def Token(update: Update, context: CallbackContext) -> None:
 
 def session_command(update: Update, context: CallbackContext) -> None:
     """Reports the total number of open chat sessions after password check."""
-    args = context.args
 
-    if not args:  # No arguments provided
-        update.message.reply_text("Access denied. Please provide the password: `/session [password]`")
-        return
-
-    if len(args) != 1 or args[0] != PASSWORD:  # Incorrect password or extra arguments
-        update.message.reply_text("Access denied. Incorrect password.",parse_mode='html')
-        return
+    if update.message.chat_id != ADMIN_CHAT_ID:  
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        return 
+            
 
     total_sessions = len(chat_histories)
     if total_sessions == 0:
@@ -605,15 +653,9 @@ def session_command(update: Update, context: CallbackContext) -> None:
 
 def session_info_command(update: Update, context: CallbackContext) -> None:
     """Reports the list of chat IDs for active chat sessions after password check."""
-    args = context.args
-
-    if not args:  # No arguments provided
-        update.message.reply_text("Access denied. Please provide the password: `/session_info [password]`")
-        return
-
-    if len(args) != 1 or args[0] != PASSWORD:  # Incorrect password or extra arguments
-        update.message.reply_text("Access denied. Incorrect password.", parse_mode='HTML')
-        return
+    if update.message.chat_id != ADMIN_CHAT_ID:  
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        return 
 
     active_chat_ids = list(chat_histories.keys())  # Get the list of chat IDs for active chat sessions
     if not active_chat_ids:
@@ -723,6 +765,9 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
     update: Update object from the Telegram Bot API.
     context: CallbackContext object from the Telegram Bot SDK.
   """
+  if update.message.chat_id != ADMIN_CHAT_ID:  
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        return 
 
   if len(context.args) > 0:
     # Loop through all provided chat IDs
@@ -1046,7 +1091,35 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
 
 
 
+def gb_broadcast(update: Update, context: CallbackContext) -> None:
+    """Broadcast a message to all users."""
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        return
 
+    # Get the message to broadcast
+    message_to_broadcast = ' '.join(context.args)
+    if not message_to_broadcast:
+        update.message.reply_text("Please provide a message to broadcast.", parse_mode=ParseMode.HTML)
+        return
+
+    users_id = DB.get_usernames()
+    if users_id:
+        update.message.reply_text("Broadcasting message to all users...", parse_mode=ParseMode.HTML)
+        for chat_id in users_id:
+            try:
+                context.bot.send_message(chat_id=chat_id, text=message_to_broadcast, parse_mode=ParseMode.HTML)
+                logger.info(f"Message sent to chat ID {chat_id}")
+            except Exception as e:
+                logger.error(f"Error sending message to chat ID {chat_id}: {e}")
+                if "bot was blocked by the user" in str(e):
+                    logger.info(f"Skipping user {chat_id} as they have blocked the bot.")
+                else:
+                    update.message.reply_text(f"Error sending message to chat ID {chat_id}: {e}", parse_mode=ParseMode.HTML)
+        
+        update.message.reply_text("Broadcast complete.", parse_mode=ParseMode.HTML)
+    else:
+        update.message.reply_text("No users found in the cloud data.", parse_mode=ParseMode.HTML)
   
 def main() -> None:
     logger.info("Bot starting!")
@@ -1071,6 +1144,8 @@ def main() -> None:
     dispatcher.add_handler(CallbackQueryHandler(button))
     dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
+    dispatcher.add_handler(CommandHandler("gb_refresh", GB_REFRESH))
+       
 
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
