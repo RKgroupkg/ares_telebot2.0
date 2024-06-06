@@ -624,6 +624,7 @@ def process_image(update: Update, context: CallbackContext) -> None:
     message = update.message
     chat_type = message.chat.type
     caption = message.caption.lower() if message.caption else ""  # Convert the caption to lowercase for case-insensitive comparison
+    chat_id = update.message.chat_id
 
     if chat_type != 'private' and not caption.startswith(("hey ares", "hi ares", "ares", "yo ares", "hello ares", "what's up ares")):
       return
