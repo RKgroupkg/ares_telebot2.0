@@ -11,6 +11,7 @@ import format_html
 import time,datetime
 import config
 import html
+import psutil
 import traceback
 import asyncio
 from search_engine_parser import GoogleSearch
@@ -613,13 +614,18 @@ def format_chat_history(chat_history):
 
 
 def process_image(update: Update, context: CallbackContext) -> None:
+    if not update.message.photo:
+        return  # No message to handle
+      
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-    chat_id = update.message.chat_id
+    
+    message = update.message
     chat_type = message.chat.type
-    user_message = update.message.caption
-    if chat_type != 'private' and not user_message.startswith(("hey ares", "hi ares", "ares", "yo ares","hello ares","what's up ares")) :
+    caption = message.caption.lower() if message.caption else ""  # Convert the caption to lowercase for case-insensitive comparison
+
+    if chat_type != 'private' and not caption.startswith(("hey ares", "hi ares", "ares", "yo ares", "hello ares", "what's up ares")):
       return
         
 
@@ -642,7 +648,7 @@ def process_image(update: Update, context: CallbackContext) -> None:
 
 
                 try:  # Error handling for image processing
-                    response = chat_seesion.send_message([user_message, img])
+                    response = chat_seesion.send_message([caption, img])
                 except genai.GenAiException as e:
                     logger.error(f"Gemini Error (Image Processing): {e}")
                     update.message.reply_text("Sorry, I had trouble processing the image.")
@@ -1272,6 +1278,57 @@ def all_blocked_users(update: Update, context: CallbackContext) -> None:
   blocked_users = DB.blocked_users_cache
   update.message.reply_text(f"User that are unblocked : {blocked_users}", parse_mode=ParseMode.HTML)
 
+
+# Function to get network speed
+def get_network_speed():
+    net_io_1 = psutil.net_io_counters()
+    time.sleep(1)  # wait for a second
+    net_io_2 = psutil.net_io_counters()
+
+    bytes_sent_per_sec = net_io_2.bytes_sent - net_io_1.bytes_sent
+    bytes_recv_per_sec = net_io_2.bytes_recv - net_io_1.bytes_recv
+
+    return bytes_sent_per_sec, bytes_recv_per_sec
+
+# Define the /ping command handler
+def ping(update: Update, context: CallbackContext) -> None:
+    if update.message.chat_id != ADMIN_CHAT_ID:
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        return
+
+    # Get system usage statistics
+    cpu_usage = psutil.cpu_percent(interval=1)
+    memory_info = psutil.virtual_memory()
+    total_memory = memory_info.total / (1024 ** 3)  # Convert bytes to GB
+    available_memory = memory_info.available / (1024 ** 3)  # Convert bytes to GB
+    used_memory = memory_info.used / (1024 ** 3)  # Convert bytes to GB
+    memory_percent = memory_info.percent
+
+    # Get network speed
+    bytes_sent_per_sec, bytes_recv_per_sec = get_network_speed()
+
+    # Convert bytes per second to Mbps
+    bytes_to_mbps = 8 / (1024 ** 2)  # Convert bytes/sec to megabits/sec
+    sent_speed_mbps = bytes_sent_per_sec * bytes_to_mbps
+    recv_speed_mbps = bytes_recv_per_sec * bytes_to_mbps
+
+    # Create the response message
+    response = (
+        "<pre>"
+        "Pong!\n"
+        f"CPU Usage: {cpu_usage}%\n"
+        f"Total Memory: {total_memory:.2f} GB\n"
+        f"Available Memory: {available_memory:.2f} GB\n"
+        f"Used Memory: {used_memory:.2f} GB ({memory_percent}%)\n"
+        f"Upload Speed: {sent_speed_mbps:.2f} Mbps\n"
+        f"Download Speed: {recv_speed_mbps:.2f} Mbps"
+        "</pre>"
+    )
+
+    # Send the response message with HTML parsing
+    update.message.reply_text(response, parse_mode=ParseMode.HTML)
+
+
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -1299,8 +1356,10 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("gb_refresh", GB_REFRESH))
     dispatcher.add_handler(CommandHandler("gb_broad_cast", gb_broadcast))   
     dispatcher.add_handler(CommandHandler("specific_broadcast", specific_broadcast))
-    dispatcher.add_handler(CommandHandler("block", block_user_command, pass_args=True))
-    dispatcher.add_handler(CommandHandler("unblock", unblock_user_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("ban", block_user_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("unban", unblock_user_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("ban_ids", all_blocked_users))
+    dispatcher.add_handler(CommandHandler("ping", ping))
     
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
