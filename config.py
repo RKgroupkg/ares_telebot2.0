@@ -334,6 +334,12 @@ Happy chatting! 😊
 
 ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛᴀᴛɪᴏɴ ɪs ᴀ ᴍᴇᴄʜᴀɴɪsᴍ ᴛᴏ ᴘʀᴏᴛᴇᴄᴛ ᴛʜᴇ ʙᴏᴛ ꜰʀᴏᴍ ꜱᴘᴀᴍ ᴏʀ ᴀʙᴜꜱᴇ. ᴛʜɪꜱ ʟɪᴍɪᴛ ᴇɴꜱᴜʀᴇꜱ ᴛʜᴀᴛ ᴏɴʟʏ 5 ᴄᴏᴍᴍᴀɴᴅꜱ ᴄᴀɴ ʙᴇ ᴇxᴇᴄᴜᴛᴇᴅ ᴘᴇʀ ᴍɪɴᴜᴛᴇ, ᴡʜɪᴄʜ ɪꜱ ᴇɴᴏᴜɢʜ ꜰᴏʀ ʀᴇɢᴜʟᴀʀ ᴜꜱᴇʀꜱ. ʙᴜᴛ ɪᴛ ɪꜱ ᴀ ɢʀᴇᴀᴛ ᴄᴏᴜɴᴛᴇʀ ᴀᴛᴛᴀᴄᴋ ꜰᴏʀ ꜱᴘᴀᴍᴍᴇʀꜱ ᴏʀ ᴘᴇʀꜱᴏɴꜱ ᴡʜᴏ ʜᴀᴠᴇ ʙᴀᴅ ɪɴᴛᴇɴᴛ.
       
+""",
+      "command_who_are_admin":"""
+<b>Who are admins?</b>
+Admins are individuals who oversee the bot and regulate its actions. They have access to specific commands like /ping and /gb_broadcast, allowing them to manage various aspects of the bot's operations. For further details, please join our community at <a href="https://t.me/AresChatBotAi">@AresChatBotAi</a>.
+
+      
 """
       
         
