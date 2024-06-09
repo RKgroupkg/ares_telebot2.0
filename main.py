@@ -1456,7 +1456,7 @@ def main() -> None:
 
 
     # Start the Bot
-    updater.start_polling()
+    updater.start_polling(drop_pending_updates=True)
 
     # Run the bot until you press Ctrl-C
     updater.idle()
