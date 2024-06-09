@@ -151,7 +151,8 @@ def button_click(update: Update, context: CallbackContext):
         go_back(update, context)
     elif query_data == "close":
         query.message.delete()
-
+    elif query_data == "Clear_history_confirmation"
+        handel_clear_history(update, context)
     else:
         get_explanation(update, context ,query_data)
 
@@ -195,12 +196,24 @@ def commands(update: Update, context: CallbackContext):
     [InlineKeyboardButton("🔍sᴇᴀʀᴄʜɪɴɢ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_searching_command")],
     [InlineKeyboardButton("⚙️sᴇᴛᴛɪɴɢ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_setting_command")],
     [InlineKeyboardButton("🛠️ᴜᴛɪʟɪᴛʏ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_utility_command")],
+    [InlineKeyboardButton("Who are admin?", callback_data="command_who_are_admin")],
+    [InlineKeyboardButton("what is command limit rate?", callback_data="Command_limit_rate")]
     [InlineKeyboardButton("← ʙᴀᴄᴋ", callback_data="back")]
 ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     text = """<i>Commands in Telegram are shortcuts to perform specific actions or get information quickly. They start with a "/" followed by a keyword.\n Arguments can be given after the command to customize its behavior.\n For example, "<code>/wiki New York</code>" fetches the info for New York.</i>\n\n <b>Choose which type of commands:-</b>"""
     update.callback_query.edit_message_caption(text, reply_markup=reply_markup,parse_mode='HTML')
+
+def handel_clear_history(update: Update, context: CallbackContext):
+        # Clear the chat history and start a new one with the default prompt
+        chat_histories[chat_id] = model.start_chat(history=[])
+        DB.chat_history_add(chat_id,[])
+        keyboard = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],]   
+        keyboard  = InlineKeyboardMarkup(keyboard)
+
+        update.message.reply_text("Chat history successfully cleared.",reply_markup=keyboard )
 
 def prompting(update: Update, context: CallbackContext):
     keyboard = [
@@ -356,7 +369,7 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
 
     
     if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
         
     chat_id = update.message.chat_id
@@ -595,10 +608,13 @@ def clear_history(update: Update, context: CallbackContext) -> None:
 
     try:
         if chat_id in chat_histories:
-            # Clear the chat history and start a new one with the default prompt
-            chat_histories[chat_id] = model.start_chat(history=[])
-            DB.chat_history_add(chat_id,[])
-            update.message.reply_text("Chat history successfully cleared.")
+                conformation = [
+                        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+                        [InlineKeyboardButton("🤨Are you confirm ?", callback_data="Clear_history_confirmation")],
+                            ]   
+                conformation = InlineKeyboardMarkup(conformation)
+
+                update.message.reply_text("This action cannot be reversed or undone. It will delete the entire conversation between you and the recipient. Please note that while the message from Telegram won't be deleted, all other messages exchanged will be permanently removed.",reply_markup=conformation)
         else:
             update.message.reply_text(f"error 404! chatID:{chat_id} not found in local data\n\n try refreshing")
         
@@ -777,7 +793,7 @@ def session_info_command(update: Update, context: CallbackContext) -> None:
     if not active_chat_ids:
         update.message.reply_text("There are no active chat sessions.", parse_mode='HTML')
     else:
-        session_message = f"The active chat sessions have the following chat IDs: <code>{', '.join(str(chat_id) for chat_id in active_chat_ids)}</code>"
+        session_message = f"The active chat sessions have the following chat IDs: <code>{' '.join(str(chat_id) for chat_id in active_chat_ids)}</code>"
         update.message.reply_text(session_message, parse_mode='HTML')
 
 def media_handler(update: Update, context: CallbackContext) -> None:
