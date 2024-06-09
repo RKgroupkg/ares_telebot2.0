@@ -24,15 +24,7 @@ from utils import escape,rate_limit
 import shutil
 import jsonpickle
 
-from config import (
-    DEVELOPER_CHAT_ID,
-    ADMIN_CHAT_ID,
-    SUPPORT_CHAT_ID,
-    system_instruction,
-    generation_config,
-    help_text,
-    safety_settings
-)
+from config import *
 
 
 PASSWORD = os.environ.get('password')
@@ -50,6 +42,186 @@ model = genai.GenerativeModel(
   generation_config=generation_config,
   system_instruction= system_instruction)
 
+
+
+def get_explanation(update: Update, context: CallbackContext, command: str):
+    keyboard = [
+        [InlineKeyboardButton("⬅ Back", callback_data=f"back_{command.split('_')[0]}")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    command_title = command.replace("_", " ").title()  # Convert to Pascal case
+    formatted_text = f"<b>{command_title}</b>\n\n{INFO.get(command, 'No information available for this command.')}"
+    if len(formatted_text) > 1024:
+        keyboard = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+    ]   
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        context.bot.send_message(chat_id=update.effective_chat.id ,text=formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+    else:
+        update.callback_query.edit_message_caption(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+
+# Function to handle the initial home command
+def home(update: Update, context: CallbackContext):
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        keyboard = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+            ]   
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        context.bot.send_message(chat_id=update.effective_chat.id ,text="You are been blocked from using this bot. contact the owner for more info.", reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+        
+        return
+    keyboard = [
+        [InlineKeyboardButton("🛠️ᴄᴏᴍᴍᴀɴᴅs", callback_data="home_commands")],
+        [InlineKeyboardButton("✍ᴘʀᴏᴍᴘᴛɪɴɢ", callback_data="home_prompting")],
+        [InlineKeyboardButton("📝ᴇxᴛʀᴀ ɪɴғᴏ", callback_data="home_extra_info")],
+        [InlineKeyboardButton("💲sᴜᴘᴘᴏʀᴛ", callback_data="home_support")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    text = """👋 Welcome to Ares! Your all-in-one digital assistant ready to make your life easier.\n With powerful AI capabilities, Ares can help you with tasks, provide information, and even engage in friendly conversation. \nLet's get started on making your digital experience smarter and more efficient! 🚀 \n\n <b>pick the topic in which you need help:-</b>"""
+    with open(LOGO_PATH, "rb") as photo:
+        context.bot.send_photo(
+    chat_id=update.effective_chat.id,
+    photo=photo,
+    caption=text,
+    reply_markup=reply_markup,
+    parse_mode='HTML'
+)
+
+
+
+
+def _home(update: Update, context: CallbackContext):
+    keyboard = [
+        [InlineKeyboardButton("🛠️ᴄᴏᴍᴍᴀɴᴅs", callback_data="home_commands")],
+        [InlineKeyboardButton("✍ᴘʀᴏᴍᴘᴛɪɴɢ", callback_data="home_prompting")],
+        [InlineKeyboardButton("📝ᴇxᴛʀᴀ ɪɴғᴏ", callback_data="home_extra_info")],
+        [InlineKeyboardButton("💲sᴜᴘᴘᴏʀᴛ", callback_data="home_support")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    text = """👋 Welcome to Ares! Your all-in-one digital assistant ready to make your life easier.\n With powerful AI capabilities, Ares can help you with tasks, provide information, and even engage in friendly conversation. \nLet's get started on making your digital experience smarter and more efficient! 🚀 \n\n <b>pick the topic in which you need help:-</b>"""
+    update.callback_query.edit_message_caption(text, reply_markup=reply_markup,parse_mode='HTML')
+
+# Function to handle callback queries
+def button_click(update: Update, context: CallbackContext):
+    query = update.callback_query
+    query.answer()
+    query_data = query.data
+    if query_data.startswith("home_"):
+        handle_home_command(update, context, query_data)
+    elif query_data.startswith("command_"):
+        get_explanation(update, context ,query_data)
+    elif query_data.startswith("prompting_"):
+        get_explanation(update, context ,query_data)
+    elif query_data.startswith("extra_info_"):
+        get_explanation(update, context ,query_data)
+    elif query_data == "home_support":
+        handle_support(update, context)
+    elif query_data.startswith("back"):
+        go_back(update, context)
+    elif query_data == "close":
+        query.message.delete()
+
+    else:
+        get_explanation(update, context ,query_data)
+
+
+
+def handle_home_command(update: Update, context: CallbackContext, query_data: str):
+    if query_data == "home_commands":
+        commands(update, context)
+    elif query_data == "home_prompting":
+        prompting(update, context)
+    elif query_data == "home_extra_info":
+        extra_info(update, context)
+    elif query_data == "home_support":
+        handle_support(update, context)
+
+def go_back(update: Update, context: CallbackContext):
+    # Check if callback query is None, use update.message instead
+    if update.callback_query:
+        query_data = update.callback_query.data
+    elif update.message:
+        # Extract callback data from the text of the message
+        query_data = update.message.text.split(":")[-1].strip()
+
+    # Default to home menu if unable to determine previous menu
+    previous_menu = _home
+
+    if query_data == "back_command":
+        previous_menu = commands
+    elif query_data == "back_prompting":
+        previous_menu = prompting
+    elif query_data == "back_extra":
+        previous_menu = extra_info
+
+    # Display the previous menu
+    previous_menu(update, context)
+
+def commands(update: Update, context: CallbackContext):
+    keyboard = [
+    [InlineKeyboardButton("👮‍♂️ᴀᴅᴍɪɴ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_admin_command")],
+    [InlineKeyboardButton("🤖ᴀɪ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_ai_command")],
+    [InlineKeyboardButton("🔍sᴇᴀʀᴄʜɪɴɢ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_searching_command")],
+    [InlineKeyboardButton("⚙️sᴇᴛᴛɪɴɢ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_setting_command")],
+    [InlineKeyboardButton("🛠️ᴜᴛɪʟɪᴛʏ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_utility_command")],
+    [InlineKeyboardButton("← ʙᴀᴄᴋ", callback_data="back")]
+]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    text = """<i>Commands in Telegram are shortcuts to perform specific actions or get information quickly. They start with a "/" followed by a keyword.\n Arguments can be given after the command to customize its behavior.\n For example, "<code>/wiki New York</code>" fetches the info for New York.</i>\n\n <b>Choose which type of commands:-</b>"""
+    update.callback_query.edit_message_caption(text, reply_markup=reply_markup,parse_mode='HTML')
+
+def prompting(update: Update, context: CallbackContext):
+    keyboard = [
+    [InlineKeyboardButton("📜ɪɴᴛʀᴏᴅᴜᴄᴛɪᴏɴ", callback_data="prompting_what")],
+    [InlineKeyboardButton("📂ᴍᴇᴅɪᴀ ᴘʀᴏᴍᴘᴛɪɴɢ", callback_data="prompting_media_prompting")],
+    [InlineKeyboardButton("💡sᴜᴘᴘᴏʀᴛᴇᴅ ғᴏʀᴍᴀᴛ", callback_data="prompting_supported_format")],
+    [InlineKeyboardButton("← ʙᴀᴄᴋ", callback_data="back")]
+]
+
+    text = """<b>Introduction to prompt design</b> 
+<i>Prompt design is the process of creating prompts that elicit the desired response from language models.
+Writing well structured prompts is an essential part of ensuring accurate, high quality responses from a language model. 
+This page introduces some basic concepts, strategies, and best practices to get you started in designing prompts.</i>\n\n<b>Choose any sub-topic in prompting:-</b>"""
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.callback_query.edit_message_caption(text, reply_markup=reply_markup,parse_mode='HTML')
+
+def extra_info(update: Update, context: CallbackContext):
+    keyboard = [
+    [InlineKeyboardButton("💻ᴅᴇᴠᴇʟᴏᴘᴇʀ", callback_data="extra_info_developer")],
+    [InlineKeyboardButton("🐛ʙᴜɢ/ᴠᴇʀsɪᴏɴ", callback_data="extra_info_bug_version")],
+    [InlineKeyboardButton("🤝ᴄᴏɴᴛʀɪʙᴜᴛᴇ", callback_data="extra_info_contribute")],
+    [InlineKeyboardButton("💬sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ", callback_data="extra_info_support_chat")],
+    [InlineKeyboardButton("🤔ʜᴏᴡ ᴛᴏ ᴜsᴇ ɪɴ ɢʀᴏᴜᴘ?", callback_data="extra_info_how_to_use_in_group")],
+    [InlineKeyboardButton("← ʙᴀᴄᴋ", callback_data="back")]
+
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.callback_query.edit_message_caption("Choose an info type:", reply_markup=reply_markup)
+
+
+
+
+
+def handle_support(update: Update, context: CallbackContext):
+    keyboard = [
+        [InlineKeyboardButton("⬅ Back", callback_data="back")],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    text = """
+<b>Support:</b>
+You can support me with a small donation 💵 or a cup of coffee ☕ on <a href="https://www.buymeacoffee.com/Rkgroup">Buy Me a Coffee</a>.
+
+<b>Telegram Account:</b> <a href="https://t.me/Rkgroup5316">@Rkgroup5316</a>
+<b>Support Chat:</b> Join our official support group on <a href="https://t.me/AresChatBotAi">Telegram</a>.
+<b>GitHub:</b> Check out our projects on <a href="https://github.com/RKgroupkg">GitHub</a>.
+
+
+"""
+
+    update.callback_query.edit_message_caption(text, reply_markup=reply_markup,parse_mode='HTML')
 
     
      
@@ -278,16 +450,6 @@ def send_message(update: Update,message: str,format = True,parse_mode = "HTML") 
 
 
 
-
-def help_command(update: Update, context: CallbackContext) -> None:
-  """Send a well-formatted help message """
-  if DB.is_user_blocked(str(update.message.from_user.id)):
-          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
-          update.message.reply_text(f"You are blocked sorry you message are being ignored contact the owner for more details", parse_mode='HTML', disable_web_page_preview=True)
-          return
-  logger.info(f"help command asked by :{update.message.from_user.username}")
-  update.message.reply_text(help_text, parse_mode='HTML', disable_web_page_preview=True)
-
 def INFO(update: Update, context: CallbackContext) -> None:
   """Send a well-formatted info message """
   if DB.is_user_blocked(str(update.message.from_user.id)):
@@ -380,37 +542,6 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(f"An error occurred while clearing the chat history: {e}")
         logger.error(f"An error occurred while clearing the chat history: {e}")
 
-def start(update: Update, context: CallbackContext) -> None:
-    if DB.is_user_blocked(str(update.message.from_user.id)):
-          logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
-          return
-    if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
-        return
-    command_logger.log_command(update.effective_user.id,'/start')
-    user = update.message.from_user
-    username = user.first_name if user.first_name else user.username if user.username else "there"
-
-    welcome_message = f"Hello {username}! I'm Ares, your AI assistant. How can I help you today?"
-
-    keyboard = [
-        [InlineKeyboardButton("Help", callback_data='help')],
-        [InlineKeyboardButton("Contact Owner", callback_data='contact')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    update.message.reply_text(welcome_message, reply_markup=reply_markup)
-
-def button(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query
-    query.answer()
-
-    if query.data == 'help':
-        help_message = help_text
-        query.edit_message_text(text=help_message, parse_mode='HTML')
-    elif query.data == 'contact':
-        contact_message = "You can contact the owner at @Rkgroup5316. or join https://t.me/AresChatBotAi for info and bug reports ."
-        query.edit_message_text(text=contact_message)
 
 def clear_history(update: Update, context: CallbackContext) -> None:
     """Clear the chat history for the current chat."""
@@ -1245,11 +1376,11 @@ def main() -> None:
 
 
     # Register the help command handler
-    dispatcher.add_handler(CommandHandler("help", help_command))
+    dispatcher.add_handler(CommandHandler("help", home))
+    dispatcher.add_handler(CommandHandler("start", home))
     dispatcher.add_handler(CommandHandler("bug", bug))
     dispatcher.add_handler(CommandHandler("info", INFO))
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CallbackQueryHandler(button))
+    
     dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
     # ADMNIN command 
@@ -1281,6 +1412,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("ChangePrompt", change_prompt, pass_args=True))
 
     dispatcher.add_error_handler(error_handler)
+    dispatcher.add_handler(CallbackQueryHandler(button_click))
 
 
 
