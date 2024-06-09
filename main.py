@@ -30,6 +30,17 @@ from config import *
 PASSWORD = os.environ.get('password')
 
 chat_histories ={}
+command_limit_inline_list = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+        [InlineKeyboardButton("what is command limit rate?", callback_data="Command_limit_rate")],
+    ]   
+command_limit_inline = InlineKeyboardMarkup(command_limit_inline_list)
+
+Invalid_arg_list = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+        [InlineKeyboardButton("Help", callback_data="home_commands")],
+    ]   
+Invalid_arg = InlineKeyboardMarkup(Invalid_arg_list)
 
 
 api_key = os.environ.get('gemnie_api')
@@ -59,8 +70,15 @@ def get_explanation(update: Update, context: CallbackContext, command: str):
         reply_markup = InlineKeyboardMarkup(keyboard)
         context.bot.send_message(chat_id=update.effective_chat.id ,text=formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
     else:
-        update.callback_query.edit_message_caption(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
-
+        if update.callback_query.message.photo:
+            update.callback_query.edit_message_caption(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+        else:
+            keyboard = [
+                    [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+              ]   
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            update.callback_query.edit_message_text(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+           
 # Function to handle the initial home command
 def home(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
@@ -466,7 +484,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
   """REFRESH ALL USERS FROM CLOUD"""
   if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
         return 
   users_id = DB.get_usernames()
   if users_id:
@@ -503,7 +521,7 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
     if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/refresh')
     logger.info(f"REFRESH command asked by :{update.message.from_user.username}")
@@ -559,7 +577,7 @@ def clear_history(update: Update, context: CallbackContext) -> None:
                   update.message.reply_text("Invalid chat ID. Please provide a valid integer ID.", parse_mode='HTML')
                   return
           else:
-            update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+            update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
             
     else: 
         chat_id = update.message.chat_id
@@ -583,7 +601,7 @@ def history(update: Update, context: CallbackContext) -> None:
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
     if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/history')
     args = context.args
@@ -727,7 +745,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
     """Reports the total number of open chat sessions after password check."""
 
     if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
         return 
             
 
@@ -741,7 +759,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
 def session_info_command(update: Update, context: CallbackContext) -> None:
     """Reports the list of chat IDs for active chat sessions after password check."""
     if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
         return 
 
     active_chat_ids = list(chat_histories.keys())  # Get the list of chat IDs for active chat sessions
@@ -856,7 +874,7 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
     context: CallbackContext object from the Telegram Bot SDK.
   """
   if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML')
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
         return 
 
   if len(context.args) > 0:
@@ -968,7 +986,7 @@ def wiki(update: Update, context: CallbackContext):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
     if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/wiki')
     chat_id = update.effective_chat.id
@@ -1008,7 +1026,7 @@ def wiki(update: Update, context: CallbackContext):
           update.message.reply_text("Error 500! server error!", parse_mode=ParseMode.HTML)
         
     else:
-       update.message.reply_text("Error 400! pls provide a query to search in wiki!", parse_mode=ParseMode.HTML)
+       update.message.reply_text("Error 400! pls provide a query to search in wiki!", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
 
 def create_image(prompt: str) -> bytes:
         """Generates an AI-generated image based on the provided prompt.
@@ -1050,8 +1068,9 @@ def imagine(update: Update, context: CallbackContext):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
     if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
+      
     command_logger.log_command(update.effective_user.id,'/imagine')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
@@ -1059,12 +1078,15 @@ def imagine(update: Update, context: CallbackContext):
       update.message.reply_text(f"error 404 no promt provided pls provide prompt")
       return 
       
-      
+    start_time = time.time()
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.FIND_LOCATION)
     try:
         logger.info(f"requesting for image for chatId:{chat_id}  prompt:{search}")
         x = create_image(search)
         logger.info(f"image created successfully")
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+      
         context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
         
         try:
@@ -1080,12 +1102,11 @@ def imagine(update: Update, context: CallbackContext):
         # Now proceed with processing the file
           
         caption = f"""
-prompt: {search}
-chat_id: {chat_id}
 
-
-
-
+ᴘʀᴏᴍᴘᴛ: {search}\n
+cʜᴀᴛ_ɪᴅ: {chat_id}\n\n
+ᴛɪᴍᴇ ᴛᴀᴋᴇɴ:{elapsed_time} Sec
+- ɢᴇɴʀᴀᴛᴇᴅ ʙʏ @ᴀʀᴇs_ᴄʜᴀᴛʙᴏᴛ
 """
         keyboard = [
         [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
@@ -1107,13 +1128,13 @@ def Google_search(update: Update, context: CallbackContext) -> None:
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
     if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/google')
     chat_id = update.effective_chat.id
     search = " ".join(context.args)
     if not search:
-        update.message.reply_text(f"error 404 no query provided pls provide a search query")
+        update.message.reply_text(f"error 404 no query provided pls provide a search query",reply_markup=Invalid_arg)
         return 
 
     # Run the async function in the event loop
@@ -1147,7 +1168,7 @@ def bug(update: Update, context: CallbackContext) -> None:
     chat_id = update.effective_chat.id
     bugs = " ".join(context.args)
     if not bugs:
-      update.message.reply_text(f"Type the bug or error you are facing")
+      update.message.reply_text(f"Type the bug or error you are facing",reply_markup=Invalid_arg)
       return 
     mention = (
         "[" + update.message.from_user.first_name+ "](tg://user?id=" + str(update.message.from_user.id) + ")"
@@ -1224,7 +1245,7 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
 def gb_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to all users."""
     if update.message.chat_id != ADMIN_CHAT_ID:
-        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
         return
 
     # Get the message to broadcast
@@ -1255,7 +1276,7 @@ def gb_broadcast(update: Update, context: CallbackContext) -> None:
 def specific_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to a specific user."""
     if update.message.chat_id != ADMIN_CHAT_ID:
-        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
         return
 
     if len(context.args) < 2:
@@ -1280,7 +1301,7 @@ def specific_broadcast(update: Update, context: CallbackContext) -> None:
 def block_user_command(update: Update, context: CallbackContext) -> None:
     """Block a user."""
     if update.message.chat_id != ADMIN_CHAT_ID:
-        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
         return
 
     if len(context.args) != 1:
@@ -1294,7 +1315,7 @@ def block_user_command(update: Update, context: CallbackContext) -> None:
 def unblock_user_command(update: Update, context: CallbackContext) -> None:
     """Unblock a user."""
     if update.message.chat_id != ADMIN_CHAT_ID:
-        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
         return
 
     if len(context.args) != 1:
@@ -1308,7 +1329,7 @@ def unblock_user_command(update: Update, context: CallbackContext) -> None:
 def all_blocked_users(update: Update, context: CallbackContext) -> None:
   """list of all blocked users"""
   if update.message.chat_id != ADMIN_CHAT_ID:
-        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
         return
   blocked_users = DB.blocked_users_cache
   update.message.reply_text(f"User that are unblocked : {blocked_users}", parse_mode=ParseMode.HTML)
@@ -1328,7 +1349,7 @@ def get_network_speed():
 # Define the /ping command handler
 def ping(update: Update, context: CallbackContext) -> None:
     if update.message.chat_id != ADMIN_CHAT_ID:
-        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Invalid_arg)
         return
 
     # Get system usage statistics
