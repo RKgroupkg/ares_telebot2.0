@@ -151,7 +151,7 @@ def button_click(update: Update, context: CallbackContext):
         go_back(update, context)
     elif query_data == "close":
         query.message.delete()
-    elif query_data == "Clear_history_confirmation"
+    elif query_data == "Clear_history_confirmation":
         handel_clear_history(update, context)
     else:
         get_explanation(update, context ,query_data)
