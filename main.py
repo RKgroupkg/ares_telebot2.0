@@ -51,7 +51,7 @@ def get_explanation(update: Update, context: CallbackContext, command: str):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     command_title = command.replace("_", " ").title()  # Convert to Pascal case
-    formatted_text = f"<b>{command_title}</b>\n\n{INFO.get(command, 'No information available for this command.')}"
+    formatted_text = f"<b>{command_title}</b>\n\n{INFO_help.get(command, 'No information available for this command.')}"
     if len(formatted_text) > 1024:
         keyboard = [
         [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
@@ -1080,14 +1080,18 @@ def imagine(update: Update, context: CallbackContext):
         # Now proceed with processing the file
           
         caption = f"""
-        prompt: {search}
+prompt: {search}
+chat_id: {chat_id}
 
-        chat_id: {chat_id}
+
 
 
 """
-  
-        update.message.reply_photo(photo=open("image.jpg", 'rb'), caption=caption, quote=True)
+        keyboard = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+    ]   
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_photo(photo=open("image.jpg", 'rb'), caption=caption, quote=True,reply_markup=reply_markup,parse_mode='HTML')
     except Exception as e:
         update.message.reply_text(f"error while generating image error : {e}")
         logger.error(f"error while generating image error : {e}")
