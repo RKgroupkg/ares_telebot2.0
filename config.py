@@ -115,98 +115,223 @@ safety_settings = [
     {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
 ]
 
-help_text = """
-<b>Welcome to Ares, your AI assistant!</b>
+# Constants for command types
+COMMANDS, PROMPTING, EXTRA_INFO, SUPPORT = range(4)
+# Declare the file path at the top of the script
+LOGO_PATH = r"assets/ares_logo3.jpeg"
+ARES_VERSION = "1.4.5"
 
-<code>Ares is powered by <a href="https://gemini.google.com/">Gemini</a> and is ready to assist you.</code>
+INFO = {
+    "command_admin_command": """
+<b>Admin Commands</b>\n
+<code>/session</code> - Admin command, no arguments are needed\n
+<code>/session_info</code> - Display all the active chat sessions; returns a list of chat IDs\n
+<code>/gb_refresh</code> - Refresh all data from the cloud for all users; returns the list of user IDs refreshed\n
+<code>/gb_broadcast</code> - Broadcast a message to all users of the bot in HTML format\n
+<code>/specific_broadcast</code> - Broadcast to a specific user; takes an argument as chatId. Syntax: <code>/specific_broadcast (chatId) (message)</code>. Note: There must be a space between the chatId and message, and the message should be in HTML format.\n
+<code>/ban</code> - Ban user by chat ID as argument\n
+<code>/unban</code> - Unban user by chat ID as argument\n
+<code>/ban_ids</code> - Returns a list of banned users, mostly with user IDs\n
+<code>/ping</code> - Get bot stats like memory usage, storage usage, and network speed\n
+""",
+    "command_ai_command": """
+<b>AI Commands</b>\n
+<code>/imagine</code> - Generate an image by providing a prompt as an argument.\n
+<code>/changeprompt</code> - Change the text generative AI system's instructions, such as its tone and behavior. Note: Please provide a well-constructed prompt for the best experience and results.\n
+""",
+    "command_searching_command": """
+<b>Searching Commands</b>\n
+<code>/wiki</code> - Summary of wiki content. Provide specific information as arguments, otherwise it may not work correctly. For example, using <code>/wiki dog</code> might result in a <i>DisambiguationError</i> due to multiple entries for "dog". Instead, use <code>/wiki dog (animal)</code> for the desired output. Note: This command does not have auto-correct, so check your spelling.\n
+<code>/image</code> - Provides the top 4 image results from the Bing database.\n
+<code>/google</code> - Search query on Google. Note: This command is currently experiencing some errors.\n
+""",
+    "command_setting_command": """
+<b>Setting Commands</b>\n
+<code>/clear_history</code> - Clear the chat history and start fresh.\n
+<code>/history</code> - See the chat history (use with caution, as it might crash with long conversations).\n
+<code>/changeprompt</code> - Change the text generative AI system's instructions, such as its tone and behavior. Note: Please provide a well-constructed prompt for the best experience and results.\n
+<code>/refresh</code> - If any bugs occur, use this command to reload the data from the cloud. If the bug persists, use <code>/changeprompt d</code> (here "d" is for default).\n
+""",
+    "command_utility_command": """
+<b>Utility Commands</b>\n
+<code>/token</code> - Check how many tokens have been used in the conversation\n
+<code>/bug</code> - takes bug as argument and report the bug to the devloper\n
+<code>/info</code> - gives info about you acc from cloud\n
+""",
+    "prompting_what":"""
+<b>What is a prompt</b>\n
+A prompt is a natural language request submitted to a language model to receive a response back. Prompts can contain questions, instructions, contextual information, examples, and partial input for the model to complete or continue. After the model receives a prompt, depending on the type of model being used, it can generate text, embeddings, code, images, videos, music, and more.
 
-By default, Ares is a bit cheeky and enjoys playful banter. If you prefer a different style, feel free to customize it!
+Prompt content types
+Prompts can include one or more of the following types of content:
 
-<b>How to Use:</b>
+- Input (required)
+- Context (optional)
+- Examples (optional)
 
-Begin your message with <i>Hey Ares</i> or <i>Hi Ares</i>. Keep the conversation in English and avoid overly complex language for the best results.
+\n\n<b>Input</b>
+An input is the text in the prompt that you want the model to provide a response for, and it's a required content type. Inputs can be a question that the model answers (question input), a task the model performs (task input), an entity the model operates on (entity input), or partial input that the model completes or continues (completion input).
+\n-<b>Question input</b>
+A question input is a question that you ask the model that the model provides an answer to.
+\n\n<b>Task input</b>
+A task input is a task that you want the model to perform. For example, you can tell the model to give you ideas or suggestions for something. 
+\n\n-<b>Entity input</b>
+An entity input is what the model performs an action on, such as classify or summarize. This type of input can benefit from the inclusion of instructions.
+\n\n-<b>Completion input</b>
+A completion input is text that the model is expected to complete or continue.\n\n
+<a href="https://ai.google.dev/gemini-api/docs/prompting-intro">for more info</a>
 
-<b>Tailor Your Experience:</b>
+    """,
+    "prompting_supported_format": """
+<b>Supported file formats</b>
+Gemini models support prompting with multiple file formats. This section explains considerations in using general media formats for prompting, specifically image, audio, video, and plain text files. You can use media files for prompting.
 
-* <i>/changeprompt [new prompt]</i>: Customize Ares' personality. Try "Be kind and helpful" or "d" for the default sassy mode.
+<b>Image formats</b>
+You can use image data for prompting with a Gemini 1.5 model or the Gemini 1.0 Pro Vision model. When you use images for prompting, they are subject to the following limitations and requirements:
+<pre>
+Images must be in one of the following image data MIME types:
+- PNG - image/png
+- JPEG - image/jpeg
+- WEBP - image/webp
+- HEIC - image/heic
+- HEIF - image/heif
 
-  Example: <code>/changeprompt Be kind and helpful</code>
+No specific limits to the number of pixels in an image; however, larger images are scaled down to fit a maximum resolution of 3072 x 3072 while preserving their original aspect ratio.
 
-* <i>/token</i>: Check how many tokens have been used.
-* <i>/clear_history</i>: Wipe the slate clean and start fresh.
-* <i>/history</i>: ⚠️ Use with caution, as it might crash with long chats.
-* <i>/info</i>: gives info about the current chat session.
-* <i>/refresh</i>: it refresh the bot session from cloud .
-* <i>/image</i>: /image (keyword) to search image from cloud .
-* <i>/wiki</i>: /wiki (keyword) to summarize from wiki.
-* <i>/imagine</i>: /imagine (prompt) to make a Ai-genrated image
-* <i>/google</i>: /google (query) searches in google
+</pre>
 
-<b>About Limitations:</b>
+<b>Audio formats</b>
+You can use audio data for prompting with the Gemini 1.5 models. When you use audio for prompting, they are subject to the following limitations and requirements:
+<pre>
+Audio data is supported in the following common audio format MIME types:
+WAV - audio/wav
+MP3 - audio/mp3
+AIFF - audio/aiff
+AAC - audio/aac
+OGG Vorbis - audio/ogg
+FLAC - audio/flac
 
-Being free proved to be very challenging. As Google provided limited quota (system resources) for free, optimistic usage was our priority, but still, there is a limit of 5 requests per minute as a whole. During busy hours, the bot may show out of quota. In such cases, please wait patiently for a few minutes and try again later. ☺️
+The maximum supported length of audio data in a single prompt is 5 mb.
+Audio files are resampled down to a 16 Kbps data resolution, and multiple channels of audio are combined into a single channel.
 
-<b>Error Handling:</b>
+</pre>
+<b>Video formats</b>
+You can use video data for prompting with the Gemini 1.5 models.
+<pre>
+Video data is supported in the following common video format MIME types:
 
-Currently, the error handler is primitive, so some errors may occur randomly. If the error persists, try again later. If the error persists, send an image of the error with the conversation in the bugs topic. It will be tried to fix soon.
+video/mp4
+video/mpeg
+video/mov
+video/avi
+video/x-flv
+video/mpg
+video/webm
+video/wmv
+video/3gpp
+The File API service samples videos into images at 1 frame per second (FPS) and may be subject to change to provide the best inference quality. Individual images take up 258 tokens regardless of resolution and quality.
 
-<b>Inconsistency:</b>
+there is a limit of 5mb.
+</pre>
 
-Sometimes the bot may be inconsistent, which may occur due to server restarts or weird prompt changes. Ensure that the prompt change command is clear and precise to the point.
+<b>Plain text formats</b>
+<pre>
+The bot supports uploading plain text files with the following MIME types:
 
-<b>Bot Not Responding/Server Off:</b>
+text/plain
+text/html
+text/css
+text/javascript
+application/x-javascript
+text/x-typescript
+application/x-typescript
+text/csv
+text/markdown
+text/x-python
+application/x-python-code
+application/json
+text/xml
+application/rtf
+text/rtf
+</pre>\n
+<a href="https://ai.google.dev/gemini-api/docs/prompting_with_media?lang=python#image_formats">for more info</a>
+""",
+    "prompting_media_prompting":"""
+    Due to too many info related to this topic you can direclty read the gemnie context page 
+    <a href="https://ai.google.dev/gemini-api/docs/file-prompting-strategies">Media Prompting</a>
+    
+    """,
+    "extra_info_developer":"""
+<b>About the Developer</b>
 
-Sometimes the bot may be off due to some issues. In this case, please contact the owner.
+This Ares chat bot was solely developed by <a href="https://github.com/RKgroupkg">RKgroup</a> as a fun project. It was initiated on September 2, 2023, for entertainment purposes and has been continuously updated with additional features.
 
-<b>Media Support:</b>
+The project is <a href="https://github.com/RKgroupkg/ares_telebot2.0">open-source</a> and licensed under MIT.
+    """,
+    "extra_info_bug_version":f"""
 
-Ares can handle various types of media up to a limit of 5MB:
+<b>Version:</b> {ARES_VERSION}
 
-<b>Images:</b>
-- PNG (image/png)
-- JPEG (image/jpeg)
-- WEBP (image/webp)
-- HEIC (image/heic)
-- HEIF (image/heif)
+Stay updated with all the upcoming and recent updates on our <a href="https://t.me/AresChatBotAi">Ares Group</a>. Found a bug? Report it using the command <code>/bug (describe your bug)</code>.
 
-<b>Audio:</b>
-- WAV (audio/wav)
-- MP3 (audio/mp3)
-- AIFF (audio/aiff)
-- AAC (audio/aac)
-- OGG Vorbis (audio/ogg)
-- FLAC (audio/flac)
+""",
+    "extra_info_contribute":"""
+<b>Contribution:</b>
+Currently, this project is solely developed by RKgroup, hosted by Render Service, and kept online by Uptime Robot. Updates are recommended by friends, with some contributors helping improve this bot.
 
-<b>Video:</b>
-- MP4 (video/mp4)
-- MPEG (video/mpeg)
-- MOV (video/mov)
-- AVI (video/avi)
-- FLV (video/x-flv)
-- MPG (video/mpg)
-- WebM (video/webm)
-- WMV (video/wmv)
-- 3GPP (video/3gpp)
+Special thanks to:
+- @Devil_Raj_is_here
+- @sinhapritul
 
-<b>Conversation Flow:</b>
+They have recommended features and helped fix bugs.
 
-Ares maintains context in conversations, allowing seamless interaction. If chatting in DMs, no need to start with "Hey Ares." Replies to Ares' messages are automatically recognized. In group chats, Ares listens for replies to its messages when starting a new message with "Hey Ares."
+You can contribute to this project on our <a href="https://github.com/RKgroupkg/ares_telebot2.0">GitHub</a>. 
 
-<b>Data Persistence:</b>
+Or, just report any bugs to help improve the bot for everyone in the <a href="https://t.me/AresChatBotAi">Ares Group</a> or use <code>/bug (your bug)</code>.
 
-Ares remembers previous messages, allowing for natural conversation flow. However, older chat history may be forgotten after server restarts.
+""",
+    "extra_info_support_chat": """
+<b>Support Chat</b>
 
-<b>Better Prompt:</b>
+We value your experience and are here to help you with any issues or questions you might have about using the bot. Join our vibrant community in the <a href="https://t.me/AresChatBotAi">Ares Group</a>!
 
-Giving Ares a better prompt enhances its responsiveness and style. Consider prompts that match your preferences or the tone you want Ares to adopt. Aim for prompts that encourage positive, engaging conversations while reflecting your personality or the context of the conversation.
+In our support chat, you can:
+- Get real-time assistance from our team and other users
+- Share your feedback and suggestions
+- Stay updated with the latest features and improvements
+- Report bugs and help us make the bot better for everyone
 
-<b>Check Ares' Status:</b>
+Don't hesitate to reach out—we're here to ensure you have the best possible experience with Ares. Join us now and be part of our growing community!
+""",
+    "extra_info_support_chat": """
+<b>Support Chat</b>
 
-You can also check the current status of Ares <a href="https://stats.uptimerobot.com/o9D5ihvbgK">status</a>.
+We value your experience and are here to help you with any issues or questions you might have about using the bot. Join our vibrant community in the <a href="https://t.me/AresChatBotAi">Ares Group</a>!
 
-<b>Help & Bug Report:</b>
+In our support chat, you can:
+- Get real-time assistance from our team and other users
+- Share your feedback and suggestions
+- Stay updated with the latest features and improvements
+- Report bugs and help us make the bot better for everyone
 
-For further assistance or to report bugs, join our official group: <a href="https://t.me/AresChatBotAi">Ares Help & Bug Report</a>.
+Don't hesitate to reach out—we're here to ensure you have the best possible experience with Ares. Join us now and be part of our growing community!
+""",
+    "extra_info_how_to_use_in_group":"""
+<b>ʜᴏᴡ ᴛᴏ ᴜsᴇ ɪɴ ɢʀᴏᴜᴘ? 🤔💬</b>
 
-Have a great chat with Ares!
+When using Ares in direct messages, there's no need for a special start command—simply type your message. However, for a better experience in group chats, please begin your messages with a start command like <i>"hey ares," "yo ares," "hello ares," or "yoo ares."</i> For example: <i>"hey ares, how are you today?"</i> Messages without a start command will be ignored, including images.
+
+<b>Notes:</b>
+- Only video and audio/voice messages in group chats don’t require a start command. They are recognized directly by Ares.
+- All commands work the same in group chats as they do in direct messages.
+- The whole group is treated as one conversation, so Ares may get confused if multiple users send messages at the same time. Don’t worry—Ares will do its best to respond accurately.
+
+Happy chatting! 😊
+
+
+
 """
+        
+    
+    
+}
