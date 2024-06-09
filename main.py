@@ -42,6 +42,12 @@ Invalid_arg_list = [
     ]   
 Invalid_arg = InlineKeyboardMarkup(Invalid_arg_list)
 
+Admin_error_list = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+        [InlineKeyboardButton("Who are admin?", callback_data="command_who_are_admin")],
+    ]   
+Admin_error = InlineKeyboardMarkup(Admin_error_list)
+
 
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
@@ -479,7 +485,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
   if not command_logger.check_rate_limit(update.effective_user.id):
-        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.")
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one min.",reply_markup=command_limit_inline)
         return
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
   update.message.reply_text(DB.info(update.message.chat_id), parse_mode='HTML', disable_web_page_preview=True)
@@ -489,7 +495,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
   """REFRESH ALL USERS FROM CLOUD"""
   if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Admin_error)
         return 
   users_id = DB.get_usernames()
   if users_id:
@@ -582,7 +588,7 @@ def clear_history(update: Update, context: CallbackContext) -> None:
                   update.message.reply_text("Invalid chat ID. Please provide a valid integer ID.", parse_mode='HTML')
                   return
           else:
-            update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
+            update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Admin_error)
             
     else: 
         chat_id = update.message.chat_id
@@ -750,7 +756,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
     """Reports the total number of open chat sessions after password check."""
 
     if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Admin_error)
         return 
             
 
@@ -764,7 +770,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
 def session_info_command(update: Update, context: CallbackContext) -> None:
     """Reports the list of chat IDs for active chat sessions after password check."""
     if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
     active_chat_ids = list(chat_histories.keys())  # Get the list of chat IDs for active chat sessions
@@ -879,7 +885,7 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
     context: CallbackContext object from the Telegram Bot SDK.
   """
   if update.message.chat_id != ADMIN_CHAT_ID:  
-        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Invalid_arg)
+        update.message.reply_text("Access denied only admins can do this .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
   if len(context.args) > 0:
