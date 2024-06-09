@@ -121,7 +121,7 @@ COMMANDS, PROMPTING, EXTRA_INFO, SUPPORT = range(4)
 LOGO_PATH = r"assets/ares_logo3.jpeg"
 ARES_VERSION = "1.4.5"
 
-INFO = {
+INFO_help = {
     "command_admin_command": """
 <b>Admin Commands</b>\n
 <code>/session</code> - Admin command, no arguments are needed\n
