@@ -71,13 +71,18 @@ def get_explanation(update: Update, context: CallbackContext, command: str):
         context.bot.send_message(chat_id=update.effective_chat.id ,text=formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
     else:
         if update.callback_query.message.photo:
-            update.callback_query.edit_message_caption(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
-        else:
-            keyboard = [
-                    [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
-              ]   
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            update.callback_query.edit_message_text(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+            try:
+                update.callback_query.edit_message_caption(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
+                return
+            except Exception as e:
+                logger.error(f"An error occure while getting explanition of inline and sendit as caption error:{e}")
+                    
+       
+        keyboard = [
+                [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+        ]   
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.callback_query.edit_message_text(formatted_text, reply_markup=reply_markup, parse_mode='HTML',link_preview=False)
            
 # Function to handle the initial home command
 def home(update: Update, context: CallbackContext):
