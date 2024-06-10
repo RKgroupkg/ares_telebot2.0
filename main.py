@@ -214,7 +214,7 @@ def handel_clear_history(update: Update, context: CallbackContext):
         [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],]   
         keyboard  = InlineKeyboardMarkup(keyboard)
 
-        update.message.reply_text("Chat history successfully cleared.",reply_markup=keyboard )
+        context.bot.send_message(chat_id=update.effective_chat.id,text="Chat history successfully cleared.",reply_markup=keyboard )
 
 def prompting(update: Update, context: CallbackContext):
     keyboard = [
