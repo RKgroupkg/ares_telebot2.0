@@ -38,7 +38,7 @@ command_limit_inline = InlineKeyboardMarkup(command_limit_inline_list)
 
 Invalid_arg_list = [
         [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
-        [InlineKeyboardButton("Help", callback_data="home_commands")],
+        [InlineKeyboardButton("Help", callback_data="command_arg")],
     ]   
 Invalid_arg = InlineKeyboardMarkup(Invalid_arg_list)
 
