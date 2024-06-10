@@ -207,7 +207,7 @@ def commands(update: Update, context: CallbackContext):
 
 def handel_clear_history(update: Update, context: CallbackContext):
         # Clear the chat history and start a new one with the default prompt
-        chat_id = update.message.chat_id
+        chat_id = update.callback_query.message.chat_id
         chat_histories[chat_id] = model.start_chat(history=[])
         DB.chat_history_add(chat_id,[])
         keyboard = [
