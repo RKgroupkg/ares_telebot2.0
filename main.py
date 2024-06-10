@@ -197,8 +197,8 @@ def commands(update: Update, context: CallbackContext):
     [InlineKeyboardButton("⚙️sᴇᴛᴛɪɴɢ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_setting_command")],
     [InlineKeyboardButton("🛠️ᴜᴛɪʟɪᴛʏ ᴄᴏᴍᴍᴀɴᴅ", callback_data="command_utility_command")],
     [InlineKeyboardButton("Who are admin?", callback_data="command_who_are_admin")],
-    [InlineKeyboardButton("what is command limit rate?", callback_data="Command_limit_rate")]
-    [InlineKeyboardButton("← ʙᴀᴄᴋ", callback_data="back")]
+    [InlineKeyboardButton("what is command limit rate?", callback_data="Command_limit_rate")],
+    [InlineKeyboardButton("← ʙᴀᴄᴋ", callback_data="back")],
 ]
 
     reply_markup = InlineKeyboardMarkup(keyboard)
