@@ -340,6 +340,20 @@ Happy chatting! 😊
 Admins are individuals who oversee the bot and regulate its actions. They have access to specific commands like /ping and /gb_broadcast, allowing them to manage various aspects of the bot's operations. For further details, please join our community at <a href="https://t.me/AresChatBotAi">@AresChatBotAi</a>.
 
       
+""",
+      "command_arg":"""
+<b>What are Arguments?</b>
+When using commands like /wiki or /google, providing arguments is essential for them to function correctly. An argument is additional information you give to a command to specify what you are looking for.
+<i>
+For example:
+
+- Command: /wiki dog(animal)
+- Argument: dog(animal)
+In this case, dog(animal) is the argument for the /wiki command.
+</i>
+Note: If you don't pass the arguments correctly, you will encounter an error (Error 400). So, make sure to include the necessary arguments to avoid any issues! 
+      
+      
 """
       
         
