@@ -1467,7 +1467,8 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         caption=rep,
                         thumb=thumb_name,
                         title=title,
-                        duration=dur
+                        duration=dur,
+                        parse_mode="MarkdownV2"
                 )
                 
         except Exception as e:
