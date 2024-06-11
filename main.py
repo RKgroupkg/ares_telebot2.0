@@ -49,8 +49,11 @@ Admin_error_list = [
         [InlineKeyboardButton("Who are admin❓", callback_data="command_who_are_admin")],
     ]   
 Admin_error = InlineKeyboardMarkup(Admin_error_list)
-
-
+DisambiguationError_list = [
+        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
+        [InlineKeyboardButton("What is Disambiguation Error❓", callback_data="command_wiki_disambiguationerror")],
+    ]   
+DisambiguationError = Admin_error = InlineKeyboardMarkup(DisambiguationError_list) # this feature still not added .
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
 telegram_bot_token = os.environ.get('telegram_api')
@@ -1463,20 +1466,22 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                          return
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
                 try:
-                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                                info_dict = {}
-                                progress_data = {}
+                        info_dict = {}
+                        progress_data = {}
                         
-                                def progress_hook(d):
-                                        if d['status'] == 'downloading':
-                                            percent = d['_percent_str']
-                                            speed = d['_speed_str']
-                                            eta = d['_eta_str']
-                                            progress_data['percent'] = percent
-                                            progress_data['speed'] = speed
-                                            progress_data['eta'] = eta
-                                            message.edit_text(f"Downloading...\n\n<b>Progress:</b> <i>{percent}</i>\n<b>Speed:</b> <i>{speed}</i>\n<b>ETA:</b> <i>{eta}</i>", parse_mode="HTML")
-
+                        def progress_hook(d):
+                                if d['status'] == 'downloading':
+                                    percent = d['_percent_str']
+                                    speed = d['_speed_str']
+                                    eta = d['_eta_str']
+                                    progress_data['percent'] = percent
+                                    progress_data['speed'] = speed
+                                    progress_data['eta'] = eta
+                                    message.edit_text(f"Downloading🔽...\n\n<b>Progress:</b> <i>{percent}</i>\n<b>Speed:</b> <i>{speed}</i>\n<b>ETA:</b> <i>{eta}</i>", parse_mode="HTML")
+                        
+                        ydl_opts['progress_hooks'] = [progress_hook]
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                               
                                 ydl_opts['progress_hooks'] = [progress_hook]
                                 info_dict = ydl.extract_info(link, download=True)
                                 audio_file = ydl.prepare_filename(info_dict)
