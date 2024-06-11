@@ -11,3 +11,5 @@ wikipedia
 requests
 search-engine-parser
 psutil
+yt_dlp
+youtube_search
