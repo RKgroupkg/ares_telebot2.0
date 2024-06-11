@@ -53,7 +53,7 @@ DisambiguationError_list = [
         [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
         [InlineKeyboardButton("What is Disambiguation Error❓", callback_data="command_wiki_disambiguationerror")],
     ]   
-DisambiguationError = Admin_error = InlineKeyboardMarkup(DisambiguationError_list) # this feature still not added .
+DisambiguationError = InlineKeyboardMarkup(DisambiguationError_list) # this feature still not added .
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
 telegram_bot_token = os.environ.get('telegram_api')
