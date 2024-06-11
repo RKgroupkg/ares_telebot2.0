@@ -15,6 +15,8 @@ import asyncio
 from search_engine_parser import GoogleSearch
 import wikipedia,requests
 from wikipedia.exceptions import DisambiguationError, PageError
+from youtube_search import YoutubeSearch
+import yt_dlp
 
 from keep_alive import keep_alive
 from logs import logger
@@ -1415,7 +1417,71 @@ def ping(update: Update, context: CallbackContext) -> None:
     # Send the response message with HTML parsing
     update.message.reply_text(response, parse_mode=ParseMode.HTML)
 
+def Youtube(update: Update, context: CallbackContext) -> None:
+        if DB.is_user_blocked(str(update.message.from_user.id)):
+                logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+                return
+        if not command_logger.check_rate_limit(update.effective_user.id):
+                update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
+                return
+        chat_id = update.effective_chat.id
+        search = " ".join(context.args)
+        if not search:
+                update.message.reply_text(f"Eʀʀᴏʀ 400! ɴᴏ sᴇᴀʀᴄʜ ᴏ̨ᴜᴇʀʏ ᴘʀᴏᴠɪᴅᴇᴅ",reply_markup=Invalid_arg)
+                return 
+        message_ = update.message
+        user_id = message_.from_user.id
+        user_name = message_.from_user.first_name
+        message = update.message.reply_text("**» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...**")
+        ydl_opts = {"format": "bestaudio[ext=m4a]"}
+        user_info = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
+        try:
+                results = YoutubeSearch(search, max_results=1).to_dict()
+                link = f"https://youtube.com{results[0]['url_suffix']}"
+                # print(results)
+                title = results[0]["title"][:40]
+                thumbnail = results[0]["thumbnails"][0]
+                thumb_name = f"thumb{title}.jpg"
+                thumb = requests.get(thumbnail, allow_redirects=True)
+                open(thumb_name, "wb").write(thumb.content)
+                
+                duration = results[0]["duration"]
+                results[0]["url_suffix"]
+                views = results[0]["views"]
+        except Exception as e:
+                 message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!")
+                 return
+        message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
+        try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info_dict = ydl.extract_info(link, download=False)
+                        audio_file = ydl.prepare_filename(info_dict)
+                        ydl.process_info(info_dict)
+                rep = f"**ᴛɪᴛʟᴇ :** {title[:25]}\n**ᴅᴜʀᴀᴛɪᴏɴ :** `{duration}`\n**ᴠɪᴇᴡs :** `{views}`\n**ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »** {user_info}"
+                secmul, dur, dur_arr = 1, 0, duration.split(":")
+                for i in range(len(dur_arr) - 1, -1, -1):
+                        dur += int(dur_arr[i]) * secmul
+                        secmul *= 60
+                update.message.reply_audio(
+                        audio=audio=open(audio_file, 'rb'),
+                        caption=rep,
+                        thumb=thumb_name,
+                        title=title,
+                        duration=dur
+                )
+                
+        except Exception as e:
+        message.edit_text(
+            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}"
+        )
+        logger.error(e)
 
+        try:
+                os.remove(audio_file)
+                os.remove(thumb_name)
+        except Exception as e:
+                logger.error(e)
+        
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -1452,6 +1518,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("wiki", wiki))
     dispatcher.add_handler(CommandHandler("imagine", imagine))
     dispatcher.add_handler(CommandHandler("google", Google_search))
+    dispatcher.add_handler(CommandHandler(["yt", "youtube","song","music","audio"], Youtube))
     dispatcher.add_handler(CommandHandler("session", session_command))
     dispatcher.add_handler(CommandHandler("session_info", session_info_command))
     dispatcher.add_handler(CommandHandler("cid_info", extract_chat_info))
