@@ -1471,10 +1471,10 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 )
                 
         except Exception as e:
-        message.edit_text(
-            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}"
-        )
-        logger.error(e)
+                message.edit_text(
+                    f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}"
+                )
+                logger.error(e)
 
         try:
                 os.remove(audio_file)
