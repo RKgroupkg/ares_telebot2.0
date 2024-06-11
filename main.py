@@ -1464,10 +1464,10 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
                 try:
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                                 info_dict = {}
-                                 progress_data = {}
+                                info_dict = {}
+                                progress_data = {}
                         
-                                 def progress_hook(d):
+                                def progress_hook(d):
                                         if d['status'] == 'downloading':
                                             percent = d['_percent_str']
                                             speed = d['_speed_str']
@@ -1475,7 +1475,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                             progress_data['percent'] = percent
                                             progress_data['speed'] = speed
                                             progress_data['eta'] = eta
-                                            message.edit_text(f"Downloading... {percent} complete, Speed: {speed}, ETA: {eta}")
+                                            message.edit_text(f"Downloading...\n\n<b>Progress:</b> <i>{percent}</i>\n<b>Speed:</b> <i>{speed}</i>\n<b>ETA:</b> <i>{eta}</i>", parse_mode="HTML")
 
                                 ydl_opts['progress_hooks'] = [progress_hook]
                                 info_dict = ydl.extract_info(link, download=True)
