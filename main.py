@@ -1432,7 +1432,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         message_ = update.message
         user_id = message_.from_user.id
         user_name = message_.from_user.first_name
-        message = update.message.reply_text("**» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...**")
+        message = update.message.reply_text("<b>» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...</b>",parse_mode="HTML")
         ydl_opts = {"format": "bestaudio[ext=m4a]"}
         user_info = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
         try:
@@ -1449,7 +1449,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 results[0]["url_suffix"]
                 views = results[0]["views"]
         except Exception as e:
-                 message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!")
+                 message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
                  return
         message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
         try:
@@ -1464,7 +1464,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         secmul *= 60
                 update.message.reply_audio(
                         audio=open(audio_file, 'rb'),
-                        caption=rep,
+                        caption=escape.escape(rep),
                         thumb=thumb_name,
                         title=title,
                         duration=dur,
