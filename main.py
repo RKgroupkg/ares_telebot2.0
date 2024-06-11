@@ -1455,7 +1455,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         title = results[0]["title"][:40]
                         thumbnail = results[0]["thumbnails"][0]
                         thumb_name = f"thumb{title}.jpg"
-                        video_url =results.get('webpage_url')
+                        video_url =results[0]['webpage_url']
                         thumb = requests.get(thumbnail, allow_redirects=True)
                         open(thumb_name, "wb").write(thumb.content)
                         
@@ -1463,7 +1463,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         results[0]["url_suffix"]
                         views = results[0]["views"]
                 except Exception as e:
-                         message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
+                         message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ\.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
                          return
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
                 try:
