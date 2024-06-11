@@ -1455,6 +1455,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         title = results[0]["title"][:40]
                         thumbnail = results[0]["thumbnails"][0]
                         thumb_name = f"thumb{title}.jpg"
+                        video_url =results.get('webpage_url')
                         thumb = requests.get(thumbnail, allow_redirects=True)
                         open(thumb_name, "wb").write(thumb.content)
                         
@@ -1470,15 +1471,28 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         progress_data = {}
                         
                         def progress_hook(d):
-                                if d['status'] == 'downloading':
-                                    percent = d['_percent_str']
-                                    speed = d['_speed_str']
-                                    eta = d['_eta_str']
-                                    progress_data['percent'] = percent
-                                    progress_data['speed'] = speed
-                                    progress_data['eta'] = eta
-                                    message.edit_text(f"Downloading🔽...\n\n<b>Progress:</b> <i>{percent}</i>\n<b>Speed:</b> <i>{speed}</i>\n<b>ETA:</b> <i>{eta}</i>", parse_mode="HTML")
+                            if d['status'] == 'downloading':
+                                percent = d['_percent_str']
+                                speed = d['_speed_str']
+                                eta = d['_eta_str']
                         
+                                # Calculate the length of the loading bar
+                                bar_length = 20
+                                filled_length = int(bar_length * float(percent.replace('%', '')) / 100)
+                                bar = '█' * filled_length + '░' * (bar_length - filled_length)
+                        
+                                # Add emoji before the loading bar and percentage after
+                                loading_bar = f"📥 {bar} {percent}"
+                        
+                                progress_message = (
+                                    f"🕵️‍♂️Qᴜᴇʀʏ: {search}\n\n📥Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
+                                    f"📊Pʀᴏɢʀᴇss: <i>{percent}</i>\n"
+                                    f"⚡Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
+                                    f"🕒ᴇᴛᴀ: <b>{eta}</b>\n\n"
+                                    f"{loading_bar}"
+                                )
+                        
+                                message.edit_text(progress_message, parse_mode="HTML")
                         ydl_opts['progress_hooks'] = [progress_hook]
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                                
@@ -1491,13 +1505,16 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         for i in range(len(dur_arr) - 1, -1, -1):
                                 dur += int(dur_arr[i]) * secmul
                                 secmul *= 60
+                        keyboard = [[InlineKeyboardButton("Watch Video on YouTube", url=video_url)]]
+                        inline_keyboard = InlineKeyboardMarkup(keyboard)
                         update.message.reply_audio(
                                 audio=open(audio_file, 'rb'),
                                 caption=escape.escape(rep),
                                 thumb=thumb_name,
                                 title=title,
                                 duration=dur,
-                                parse_mode="MarkdownV2"
+                                parse_mode="MarkdownV2",
+                                reply_markup=inline_keyboard
                         )
                         
                 except Exception as e:
