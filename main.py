@@ -393,7 +393,7 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
                     system_instruction=new_promt )
                 chat_histories[chat_id] = model_temp.start_chat(history=[])
     
-                update.message.reply_text(f"The prompt has been successfully changed to: <b>'{new_promt}'</b>", parse_mode='HTML')
+                update.message.reply_text(f"Tʜᴇ ᴘʀᴏᴍᴘᴛ ʜᴀs ʙᴇᴇɴ 🎉sᴜᴄᴄᴇssғᴜʟʟʏ🎉 ᴄʜᴀɴɢᴇᴅ ᴛᴏ: <b>'{new_promt}'</b>", parse_mode='HTML')
                 DB.Update_instruction(chat_id,new_promt)
         DB.chat_history_add(chat_id,[])
         command_logger.log_command(update.effective_user.id,'/changeprompt')
@@ -1441,6 +1441,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         user_id = message_.from_user.id
         user_name = message_.from_user.first_name
         message = update.message.reply_text("<b>» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...</b>",parse_mode="HTML")
+        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
         def search_and_download():
                 ydl_opts = {"format": "bestaudio[ext=m4a]"}
                 user_info = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
@@ -1463,7 +1464,21 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
                 try:
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                                info_dict = ydl.extract_info(link, download=False)
+                                 info_dict = {}
+                                 progress_data = {}
+                        
+                                 def progress_hook(d):
+                                        if d['status'] == 'downloading':
+                                            percent = d['_percent_str']
+                                            speed = d['_speed_str']
+                                            eta = d['_eta_str']
+                                            progress_data['percent'] = percent
+                                            progress_data['speed'] = speed
+                                            progress_data['eta'] = eta
+                                            message.edit_text(f"Downloading... {percent} complete, Speed: {speed}, ETA: {eta}")
+
+                                ydl_opts['progress_hooks'] = [progress_hook]
+                                info_dict = ydl.extract_info(link, download=True)
                                 audio_file = ydl.prepare_filename(info_dict)
                                 ydl.process_info(info_dict)
                         rep = f"**ᴛɪᴛʟᴇ :** {title[:25]}\n**ᴅᴜʀᴀᴛɪᴏɴ :** `{duration}`\n**ᴠɪᴇᴡs :** `{views}`\n**ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »** {user_info}"
