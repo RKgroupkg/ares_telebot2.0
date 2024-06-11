@@ -1463,7 +1463,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         dur += int(dur_arr[i]) * secmul
                         secmul *= 60
                 update.message.reply_audio(
-                        audio=audio=open(audio_file, 'rb'),
+                        audio=open(audio_file, 'rb'),
                         caption=rep,
                         thumb=thumb_name,
                         title=title,
