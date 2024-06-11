@@ -989,11 +989,14 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.FIND_LOCATION)
     keyboard = [[InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],]   
     keyboard  = InlineKeyboardMarkup(keyboard)
-    start_time = time.time()
-    downloaded_images = download_images(query_)
-    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
 
-    if downloaded_images:
+
+    def image_pros(update,context,query_):
+        start_time = time.time()
+        downloaded_images = download_images(query_)
+        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.UPLOAD_PHOTO)
+
+        if downloaded_images:
             for image_path in downloaded_images:
                 with open(image_path, 'rb') as image_file:
                     context.bot.send_photo(chat_id, photo=image_file)
@@ -1011,10 +1014,15 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
             """
             context.bot.send_message(chat_id, text=text, reply_markup=keyboard)
             shutil.rmtree(f"images/{query_}")
-    else:
+        else:
             context.bot.send_message(chat_id, text="No images found for your search Query.",reply_markup=keyboard)
     
-  
+    
+    threading.Thread(target=image_pros, args=(update,context,query_)).start()
+
+
+
+    
 def wiki(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
@@ -1433,56 +1441,61 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         user_id = message_.from_user.id
         user_name = message_.from_user.first_name
         message = update.message.reply_text("<b>» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...</b>",parse_mode="HTML")
-        ydl_opts = {"format": "bestaudio[ext=m4a]"}
-        user_info = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
-        try:
-                results = YoutubeSearch(search, max_results=1).to_dict()
-                link = f"https://youtube.com{results[0]['url_suffix']}"
-                # print(results)
-                title = results[0]["title"][:40]
-                thumbnail = results[0]["thumbnails"][0]
-                thumb_name = f"thumb{title}.jpg"
-                thumb = requests.get(thumbnail, allow_redirects=True)
-                open(thumb_name, "wb").write(thumb.content)
-                
-                duration = results[0]["duration"]
-                results[0]["url_suffix"]
-                views = results[0]["views"]
-        except Exception as e:
-                 message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
-                 return
-        message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
-        try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info_dict = ydl.extract_info(link, download=False)
-                        audio_file = ydl.prepare_filename(info_dict)
-                        ydl.process_info(info_dict)
-                rep = f"**ᴛɪᴛʟᴇ :** {title[:25]}\n**ᴅᴜʀᴀᴛɪᴏɴ :** `{duration}`\n**ᴠɪᴇᴡs :** `{views}`\n**ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »** {user_info}"
-                secmul, dur, dur_arr = 1, 0, duration.split(":")
-                for i in range(len(dur_arr) - 1, -1, -1):
-                        dur += int(dur_arr[i]) * secmul
-                        secmul *= 60
-                update.message.reply_audio(
-                        audio=open(audio_file, 'rb'),
-                        caption=escape.escape(rep),
-                        thumb=thumb_name,
-                        title=title,
-                        duration=dur,
-                        parse_mode="MarkdownV2"
-                )
-                
-        except Exception as e:
-                message.edit_text(
-                    f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}"
-                )
-                logger.error(e)
-
-        try:
-                os.remove(audio_file)
-                os.remove(thumb_name)
-        except Exception as e:
-                logger.error(e)
+        def search_and_download():
+                ydl_opts = {"format": "bestaudio[ext=m4a]"}
+                user_info = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
+                try:
+                        results = YoutubeSearch(search, max_results=1).to_dict()
+                        link = f"https://youtube.com{results[0]['url_suffix']}"
+                        # print(results)
+                        title = results[0]["title"][:40]
+                        thumbnail = results[0]["thumbnails"][0]
+                        thumb_name = f"thumb{title}.jpg"
+                        thumb = requests.get(thumbnail, allow_redirects=True)
+                        open(thumb_name, "wb").write(thumb.content)
+                        
+                        duration = results[0]["duration"]
+                        results[0]["url_suffix"]
+                        views = results[0]["views"]
+                except Exception as e:
+                         message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
+                         return
+                message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
+                try:
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                                info_dict = ydl.extract_info(link, download=False)
+                                audio_file = ydl.prepare_filename(info_dict)
+                                ydl.process_info(info_dict)
+                        rep = f"**ᴛɪᴛʟᴇ :** {title[:25]}\n**ᴅᴜʀᴀᴛɪᴏɴ :** `{duration}`\n**ᴠɪᴇᴡs :** `{views}`\n**ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »** {user_info}"
+                        secmul, dur, dur_arr = 1, 0, duration.split(":")
+                        for i in range(len(dur_arr) - 1, -1, -1):
+                                dur += int(dur_arr[i]) * secmul
+                                secmul *= 60
+                        update.message.reply_audio(
+                                audio=open(audio_file, 'rb'),
+                                caption=escape.escape(rep),
+                                thumb=thumb_name,
+                                title=title,
+                                duration=dur,
+                                parse_mode="MarkdownV2"
+                        )
+                        
+                except Exception as e:
+                        message.edit_text(
+                            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}"
+                        )
+                        logger.error(e)
         
+                try:
+                        os.remove(audio_file)
+                        os.remove(thumb_name)
+                except Exception as e:
+                        logger.error(e)
+        # Start the search and download process in a separate thread
+        thread = threading.Thread(target=search_and_download)
+        thread.start()        
+
+
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
