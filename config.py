@@ -144,6 +144,7 @@ INFO_help = {
 <code>/wiki</code> - Summary of wiki content. Provide specific information as arguments, otherwise it may not work correctly. For example, using <code>/wiki dog</code> might result in a <i>DisambiguationError</i> due to multiple entries for "dog". Instead, use <code>/wiki dog (animal)</code> for the desired output. Note: This command does not have auto-correct, so check your spelling.\n
 <code>/image</code> - Provides the top 4 image results from the Bing database.\n
 <code>/google</code> - Search query on Google. Note: This command is currently experiencing some errors.\n
+<code>/yt</code> - gives you the audio downloadable file with the query you serach from YouTube.You can also use this comamnds which doe same thing <code>/music</code>,<code>/youtube</code>.This commands requires an argument the song/video name.\n
 """,
     "command_setting_command": """
 <b>Setting Commands</b>\n
