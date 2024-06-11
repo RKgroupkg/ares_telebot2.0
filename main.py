@@ -1467,33 +1467,6 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                          return
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
                 try:
-                        info_dict = {}
-                        progress_data = {}
-                        
-                        def progress_hook(d):
-                            if d['status'] == 'downloading':
-                                percent = d['_percent_str']
-                                speed = d['_speed_str']
-                                eta = d['_eta_str']
-                        
-                                # Calculate the length of the loading bar
-                                bar_length = 20
-                                filled_length = int(bar_length * float(percent.replace('%', '')) / 100)
-                                bar = '█' * filled_length + '░' * (bar_length - filled_length)
-                        
-                                # Add emoji before the loading bar and percentage after
-                                loading_bar = f"📥 {bar} {percent}"
-                        
-                                progress_message = (
-                                    f"🕵️‍♂️Qᴜᴇʀʏ: {search}\n\n📥Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
-                                    f"📊Pʀᴏɢʀᴇss: <i>{percent}</i>\n"
-                                    f"⚡Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
-                                    f"🕒ᴇᴛᴀ: <b>{eta}</b>\n\n"
-                                    f"{loading_bar}"
-                                )
-                        
-                                message.edit_text(progress_message, parse_mode="HTML")
-                        ydl_opts['progress_hooks'] = [progress_hook]
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                                
                                 ydl_opts['progress_hooks'] = [progress_hook]
