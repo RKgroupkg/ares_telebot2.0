@@ -1466,13 +1466,13 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                          message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ\.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
                          return
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
-                last_update_time = datetime.now()
+                last_update_time = datetime.datetime.now()
 
                 def progress_hook(d):
                         nonlocal last_update_time
                 
                         if d['status'] == 'downloading':
-                            now = datetime.now()
+                            now = datetime.datetime.now()
                             if now - last_update_time > timedelta(seconds=5):  # Throttle updates to every 5 seconds
                                 percent = d['_percent_str']
                                 speed = d['_speed_str']
