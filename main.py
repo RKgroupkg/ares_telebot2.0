@@ -1466,6 +1466,34 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                          message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ\.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
                          return
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
+                last_update_time = datetime.now()
+
+                def progress_hook(d):
+                        nonlocal last_update_time
+                
+                        if d['status'] == 'downloading':
+                            now = datetime.now()
+                            if now - last_update_time > timedelta(seconds=5):  # Throttle updates to every 5 seconds
+                                percent = d['_percent_str']
+                                speed = d['_speed_str']
+                                eta = d['_eta_str']
+                
+                                # Generate the loading bar
+                                total_bars = 20
+                                filled_bars = int(float(d['_percent_str'].replace('%', '')) / 100 * total_bars)
+                                loading_bar = '█' * filled_bars + '░' * (total_bars - filled_bars)
+                
+                                message.edit_text(
+                                    f"Qᴜᴇʀʏ: {search}\n\n📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
+                                    f"Pʀᴏɢʀᴇss: <i>{percent}</i> {loading_bar}\n"
+                                    f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
+                                    f"ᴇᴛᴀ: <b>{eta}</b>",
+                                    parse_mode="HTML"
+                                )
+                                last_update_time = now
+                
+                ydl_opts['progress_hooks'] = [progress_hook]
+
                 try:
                         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                                
