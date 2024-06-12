@@ -17,6 +17,7 @@ import wikipedia,requests
 from wikipedia.exceptions import DisambiguationError, PageError
 from youtube_search import YoutubeSearch
 import yt_dlp
+from datetime import timedelta
 
 from keep_alive import keep_alive
 from logs import logger
