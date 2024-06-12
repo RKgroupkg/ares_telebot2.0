@@ -1538,7 +1538,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 except Exception as e:
                         logger.error(e)
         # Start the search and download process in a separate thread
-        command_logger.log_command(update.effective_user.id,'/yt')
+        command_logger.log_command(update.effective_user.id,'/yt',5) # intensity is five for heavy rate limition 
         thread = threading.Thread(target=search_and_download)
         thread.start()        
 
