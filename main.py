@@ -1445,6 +1445,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         user_id = message_.from_user.id
         user_name = message_.from_user.first_name
         message = update.message.reply_text("<b>» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...</b>",parse_mode="HTML")
+        message_id = message.message_id
         context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
         def search_and_download():
                 ydl_opts = {"format": "bestaudio[ext=m4a]"}
@@ -1485,7 +1486,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 loading_bar = '█' * filled_bars + '░' * (total_bars - filled_bars)
                 
                                 message.edit_text(
-                                    f"Qᴜᴇʀʏ: {search}\n\n📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
+                                    f"Qᴜᴇʀʏ: {search}\n Tɪᴛʟᴇ: {html.escape(title)}\n ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_name} \n\n📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
                                     f"Pʀᴏɢʀᴇss: <i>{percent}</i> {loading_bar}\n"
                                     f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
                                     f"ᴇᴛᴀ: <b>{eta}</b>",
@@ -1508,15 +1509,20 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 secmul *= 60
                         keyboard = [[InlineKeyboardButton("Watch Video on YouTube", url=video_url)]]
                         inline_keyboard = InlineKeyboardMarkup(keyboard)
+                        if os.path.exists(thumb_name):
+                                with open(thumb_name, 'rb') as f:
+                                    thumb_data = f.read()  # Read binary data of the thumbnail
+
                         update.message.reply_audio(
                                 audio=open(audio_file, 'rb'),
                                 caption=escape.escape(rep),
-                                thumb=thumb_name,
+                                thumb=thumb_data,
                                 title=title,
                                 duration=dur,
                                 parse_mode="MarkdownV2",
                                 reply_markup=inline_keyboard
                         )
+                        context.bot.delete_message(chat_id=chat_id, message_id=message_id)
                         
                 except Exception as e:
                         message.edit_text(
