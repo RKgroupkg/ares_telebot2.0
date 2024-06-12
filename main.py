@@ -1465,7 +1465,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         results[0]["url_suffix"]
                         views = results[0]["views"]
                 except Exception as e:
-                         message.edit_text("**😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ\.**\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="MarkdownV2")
+                         message.edit_text("<b>😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.</b>\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="HTML")
                          return
                 message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
                 last_update_time = datetime.datetime.now()
@@ -1512,6 +1512,8 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         if os.path.exists(thumb_name):
                                 with open(thumb_name, 'rb') as f:
                                     thumb_data = f.read()  # Read binary data of the thumbnail
+                        else:
+                                logger.error(f"The downloaded image for({chat_id}) wasn'there ")
 
                         update.message.reply_audio(
                                 audio=open(audio_file, 'rb'),
@@ -1526,7 +1528,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         
                 except Exception as e:
                         message.edit_text(
-                            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}"
+                            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}",parse_mode="HTML"
                         )
                         logger.error(e)
         
@@ -1536,6 +1538,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 except Exception as e:
                         logger.error(e)
         # Start the search and download process in a separate thread
+        command_logger.log_command(update.effective_user.id,'/yt')
         thread = threading.Thread(target=search_and_download)
         thread.start()        
 
