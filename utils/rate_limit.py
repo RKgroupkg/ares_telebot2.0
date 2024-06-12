@@ -7,10 +7,11 @@ class CommandLogger:
         self.cleanup_interval = cleanup_interval  # Cleanup interval in seconds (default: 1 hour)
         self.last_cleanup_time = time.time()  # Last cleanup time
 
-    def log_command(self, user_id, command_name):
+    def log_command(self, user_id, command_name,intensity=1):
         """Log a command usage."""
         timestamp = time.time()
-        self.command_logs.setdefault(user_id, []).append((timestamp, command_name))
+        for i in range(intensity):
+            self.command_logs.setdefault(user_id, []).append((timestamp, command_name))
         self.last_interaction[user_id] = timestamp
 
     def check_rate_limit(self, user_id, limit=5, interval=60):
