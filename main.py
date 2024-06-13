@@ -1532,7 +1532,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 info_dict = ydl.extract_info(link, download=True)
                                 audio_file = ydl.prepare_filename(info_dict)
                                 ydl.process_info(info_dict)
-                        rep = f"**ᴛɪᴛʟᴇ :** {title[:25]}\n**ᴅᴜʀᴀᴛɪᴏɴ :** `{duration}`\n**ᴠɪᴇᴡs :** `{views}`\n**ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »** {user_info}"
+                        rep = f"<b>ᴛɪᴛʟᴇ :</b>{title[:25]}\n<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> <i>{duration}</i>\n<b>ᴠɪᴇᴡs :</b> <i>{views}</i>\n<b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »</b> {user_info}"
                         secmul, dur, dur_arr = 1, 0, duration.split(":")
                         for i in range(len(dur_arr) - 1, -1, -1):
                                 dur += int(dur_arr[i]) * secmul
@@ -1546,7 +1546,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                             audio=audio_file,
                                             thumb=thumb_file,
                                             caption=rep,
-                                            parse_mode='MarkdownV2',
+                                            parse_mode='HTML',
                                             title=title,
                                             performer=channel_name,
                                             duration=dur  # Duration in seconds
