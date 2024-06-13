@@ -1549,7 +1549,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                             parse_mode="HTML",
                                             title=title,
                                             performer=channel_name,
-                                            duration=seconds  # Duration in seconds
+                                            duration=dur  # Duration in seconds
                                         )
                        
                         context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
