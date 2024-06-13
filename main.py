@@ -1467,7 +1467,26 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 except Exception as e:
                          message.edit_text("<b>😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.</b>\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="HTML")
                          return
-                message.edit_text("» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...")
+                context.bot.delete_message(chat_id=chat_id, message_id=message_id) # dlete that message 
+                text = "» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ..."
+                if os.path.exists(thumb_name): # send all new message with thumb nail or logo image 
+                        with open(thumb_name, "rb") as photo:
+                                photo_message = context.bot.send_photo(
+                                                    chat_id=update.effective_chat.id,
+                                                    photo=photo,
+                                                    caption=text,
+                                                    parse_mode='HTML'
+                                                )
+                else:
+                        with open(LOGO_PATH, "rb") as photo:
+                                photo_message =  context.bot.send_photo(
+                                            chat_id=update.effective_chat.id,
+                                            photo=photo,
+                                            caption=text,
+                                            reply_markup=reply_markup,
+                                            parse_mode='HTML'
+                                        )
+                        
                 last_update_time = datetime.datetime.now()
 
                 def progress_hook(d):
@@ -1475,7 +1494,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 
                         if d['status'] == 'downloading':
                             now = datetime.datetime.now()
-                            if now - last_update_time > timedelta(seconds=5):  # Throttle updates to every 5 seconds
+                            if now - last_update_time > timedelta(seconds=10):  # Throttle updates to every 5 seconds
                                 percent = d['_percent_str']
                                 speed = d['_speed_str']
                                 eta = d['_eta_str']
@@ -1484,14 +1503,23 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 total_bars = 20
                                 filled_bars = int(float(d['_percent_str'].replace('%', '')) / 100 * total_bars)
                                 loading_bar = '█' * filled_bars + '░' * (total_bars - filled_bars)
-                
-                                message.edit_text(
-                                    f"Qᴜᴇʀʏ: {search}\n Tɪᴛʟᴇ: {html.escape(title)}\n ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_name} \n\n📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
-                                    f"Pʀᴏɢʀᴇss: <i>{percent}</i> {loading_bar}\n"
-                                    f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
-                                    f"ᴇᴛᴀ: <b>{eta}</b>",
-                                    parse_mode="HTML"
-                                )
+                                new_caption = (
+                                            f"Qᴜᴇʀʏ: {search}\n"                  # Displaying the search query
+                                            f"Tɪᴛʟᴇ: {html.escape(title)}\n"      # Displaying the title, escaping HTML entities for safety
+                                            f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_name} \n\n"  # Displaying the requester's name
+                                            "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"             # Informing about downloading in progress
+                                            f"Pʀᴏɢʀᴇss: <i>{percent}</i> {loading_bar}\n"  # Displaying download progress
+                                            f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"            # Displaying download speed
+                                            f"ᴇᴛᴀ: <b>{eta}</b>"                  # Displaying estimated time of arrival
+                                        )
+
+                                  
+                                context.bot.edit_message_caption(
+                                            chat_id=photo_message.chat.id,
+                                            message_id=photo_message.message_id,
+                                            caption=new_caption,
+                                            parse_mode='HTML'
+                                        )
                                 last_update_time = now
                 
                 ydl_opts['progress_hooks'] = [progress_hook]
@@ -1524,8 +1552,9 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 parse_mode="MarkdownV2",
                                 reply_markup=inline_keyboard
                         )
-                        context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-                        
+                       
+                        context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
+
                 except Exception as e:
                         message.edit_text(
                             f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}",parse_mode="HTML"
@@ -1538,7 +1567,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 except Exception as e:
                         logger.error(e)
         # Start the search and download process in a separate thread
-        command_logger.log_command(update.effective_user.id,'/yt',5) # intensity is five for heavy rate limition 
+        command_logger.log_command(update.effective_user.id,'/yt',3) # intensity is five for heavy rate limition 
         thread = threading.Thread(target=search_and_download)
         thread.start()        
 
