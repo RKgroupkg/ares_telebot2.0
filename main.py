@@ -18,6 +18,7 @@ from wikipedia.exceptions import DisambiguationError, PageError
 from youtube_search import YoutubeSearch
 import yt_dlp
 from datetime import timedelta
+import uuid
 
 from keep_alive import keep_alive
 from logs import logger
@@ -1456,9 +1457,10 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         # print(results)
                         title = results[0]["title"][:40]
                         thumbnail = results[0]["thumbnails"][0]
-                        thumb_name = f"thumb{title}.jpg"
+                        thumb_name = f"thumb{str(uuid.uuid4())}.jpg"
                         video_url = f"https://youtube.com{results[0]['url_suffix']}"
                         thumb = requests.get(thumbnail, allow_redirects=True)
+                        channel_name= results[0].get("channel", "Unknown Channel")  
                         open(thumb_name, "wb").write(thumb.content)
                         
                         duration = results[0]["duration"]
@@ -1535,23 +1537,20 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         for i in range(len(dur_arr) - 1, -1, -1):
                                 dur += int(dur_arr[i]) * secmul
                                 secmul *= 60
-                        keyboard = [[InlineKeyboardButton("Watch Video on YouTube", url=video_url)]]
+                        keyboard = [[InlineKeyboardButton("📹Watch Video on YouTube", url=video_url)]]
                         inline_keyboard = InlineKeyboardMarkup(keyboard)
-                        if os.path.exists(thumb_name):
-                                with open(thumb_name, 'rb') as f:
-                                    thumb_data = f.read()  # Read binary data of the thumbnail
-                        else:
-                                logger.error(f"The downloaded image for({chat_id}) wasn'there ")
 
-                        update.message.reply_audio(
-                                audio=open(audio_file, 'rb'),
-                                caption=escape.escape(rep),
-                                thumb=thumb_data,
-                                title=title,
-                                duration=dur,
-                                parse_mode="MarkdownV2",
-                                reply_markup=inline_keyboard
-                        )
+                        with open(thumb_name, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
+                                        context.bot.send_audio(
+                                            chat_id=update.effective_chat.id,
+                                            audio=audio_file,
+                                            thumb=thumb_file,
+                                            caption=rep,
+                                            parse_mode="HTML",
+                                            title=title,
+                                            performer=channel_name,
+                                            duration=seconds  # Duration in seconds
+                                        )
                        
                         context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
 
