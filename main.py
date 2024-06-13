@@ -1546,7 +1546,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                             audio=audio_file,
                                             thumb=thumb_file,
                                             caption=rep,
-                                            parse_mode="HTML",
+                                            parse_mode='MarkdownV2',
                                             title=title,
                                             performer=channel_name,
                                             duration=dur  # Duration in seconds
@@ -1556,7 +1556,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
 
                 except Exception as e:
                         message.edit_text(
-                            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}",parse_mode="HTML"
+                            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}",parse_mode='MarkdownV2'
                         )
                         logger.error(e)
         
