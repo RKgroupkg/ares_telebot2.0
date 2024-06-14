@@ -1047,6 +1047,7 @@ def wiki(update: Update, context: CallbackContext):
             update.message.reply_text(
                 "Dɪsᴀᴍʙɪɢᴜᴀᴛᴇᴅ ᴘᴀɢᴇs ғᴏᴜɴᴅ! Aᴅᴊᴜsᴛ ʏᴏᴜʀ ᴏ̨ᴜᴇʀʏ ᴀᴄᴄᴏʀᴅɪɴɢʟʏ.\n<i>{}</i>".format(e),
                 parse_mode=ParseMode.HTML,
+                reply_markup=DisambiguationError
             )
         except PageError as e:
             update.message.reply_text(
@@ -1549,7 +1550,8 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             )
             
             context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
-            
+            keyboard = [[InlineKeyboardButton("Watch Video on YouTube", url=video_url)]]
+            inline_keyboard = InlineKeyboardMarkup(keyboard)
             with open(audio_file, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
                 context.bot.send_audio(
                     chat_id=update.effective_chat.id,
