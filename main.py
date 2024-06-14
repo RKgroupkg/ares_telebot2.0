@@ -1531,7 +1531,12 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 info_dict = ydl.extract_info(link, download=True)
                                 audio_file = ydl.prepare_filename(info_dict)
                                 ydl.process_info(info_dict)
-                        rep = f"<b>ᴛɪᴛʟᴇ :</b><i>{html.escape(title[:25])}</i>\n<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> <i>{duration}</i>\n<b>ᴠɪᴇᴡs :</b> <i>{views}</i>\n<b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »</b> {user_info}"
+                        rep = (
+                            f"<b>ᴛɪᴛʟᴇ :</b> <i>{html.escape(title[:25])}</i>\n"
+                            f"<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> <i>{duration}</i>\n"
+                            f"<b>ᴠɪᴇᴡs :</b> <i>{views}</i>\n"
+                            f"<b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »</b> {user_info}"
+                        )
                         context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
                         secmul, dur, dur_arr = 1, 0, duration.split(":")
                         for i in range(len(dur_arr) - 1, -1, -1):
