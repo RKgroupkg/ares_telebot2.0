@@ -1559,8 +1559,12 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                        
                         
                 except Exception as e:
-                        message.edit_text(
-                            f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » <a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a>  💕</b>\n<b>ᴇʀʀᴏʀ :</b> <i>{e}</i>",parse_mode='HTML')
+                        error_message = (
+                                f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » "
+                                f"<a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a>  💕</b>\n"
+                                f"<b>ᴇʀʀᴏʀ :</b> <i>{html.escape(str(e))}</i>"
+                            )
+                        context.bot.send_message(chat_id=update.message.chat.id, text=error_message, parse_mode=ParseMode.HTML)
                         logger.error(e)
         
                 try:
