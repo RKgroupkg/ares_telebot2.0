@@ -1569,10 +1569,10 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         thread.start()        
 
 def off(update: Update, context: CallbackContext):
-    user_id = update.message.from_user.id
-    if user_id == OWNER_ID:
+    user_id = str(update.message.from_user.id)
+    if user_id == str(OWNER_ID):
         if len(context.args) > 0 and context.args[0] == SPECIAL_PASSWORD:
-            update.message.reply_text("Bot is shutting down...")
+            update.message.reply_text(f"Bot is shutting down...\n\n session_info:{SPECIAL_PASSWORD}")
             updater.stop()
         
         else:
