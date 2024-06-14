@@ -1011,11 +1011,11 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
             end_time = time.time()
             elapsed_time = end_time - start_time
             text = f"""
-            ❔Qᴜᴇʀʏ: {query_}\n
-            ✨Tᴏᴛᴀʟ ɪᴍᴀɢᴇ : {len(downloaded_images)}
-            🥀Rᴇᴏ̨ᴜᴇsᴛᴇᴅ ʙʏ: {update.effective_user.first_name} {update.effective_user.last_name}
-            ⏳Tɪᴍᴇ ᴛᴀᴋᴇɴ: {round(elapsed_time, 2)} Sec
-            🗄Pᴏᴡᴇʀᴇᴅ ʙʏ: 𝑀𝑖𝑐𝑟𝑜𝑠𝑜𝑓𝑡 𝐵𝑖𝑛𝑔
+❔Qᴜᴇʀʏ: {query_}\n
+✨Tᴏᴛᴀʟ ɪᴍᴀɢᴇ : {len(downloaded_images)}\n
+🥀Rᴇᴏ̨ᴜᴇsᴛᴇᴅ ʙʏ: {update.effective_user.first_name} {update.effective_user.last_name}\n
+⏳Tɪᴍᴇ ᴛᴀᴋᴇɴ: {round(elapsed_time, 2)} Sec\n
+🗄Pᴏᴡᴇʀᴇᴅ ʙʏ: 𝑀𝑖𝑐𝑟𝑜𝑠𝑜𝑓𝑡 𝐵𝑖𝑛𝑔
             """
             context.bot.send_message(chat_id, text=text, reply_markup=keyboard)
             shutil.rmtree(f"images/{query_}")
@@ -1506,13 +1506,13 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 filled_bars = int(float(d['_percent_str'].replace('%', '')) / 100 * total_bars)
                                 loading_bar = '█' * filled_bars + '░' * (total_bars - filled_bars)
                                 new_caption = (
-                                            f"Qᴜᴇʀʏ: {search}\n"                  # Displaying the search query
-                                            f"Tɪᴛʟᴇ: {html.escape(title)}\n"      # Displaying the title, escaping HTML entities for safety
-                                            f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_info} \n\n"  # Displaying the requester's name
-                                            "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"             # Informing about downloading in progress
-                                            f"Pʀᴏɢʀᴇss: <i>{percent}</i>\n {loading_bar}\n"  # Displaying download progress
-                                            f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"            # Displaying download speed
-                                            f"ᴇᴛᴀ: <b>{eta}</b>"                  # Displaying estimated time of arrival
+                                        f"Qᴜᴇʀʏ: {html.escape(search)}\n"
+                                        f"Tɪᴛʟᴇ: {html.escape(title)}\n"
+                                        f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_info}\n\n"
+                                        "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
+                                        f"Pʀᴏɢʀᴇss: <i>{percent}</i>\n {loading_bar}\n"
+                                        f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
+                                        f"ᴇᴛᴀ: <b>{eta}</b>"
                                         )
 
                                   
@@ -1527,8 +1527,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 ydl_opts['progress_hooks'] = [progress_hook]
 
                 try:
-                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                               
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:       
                                 info_dict = ydl.extract_info(link, download=True)
                                 audio_file = ydl.prepare_filename(info_dict)
                                 ydl.process_info(info_dict)
@@ -1540,7 +1539,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 secmul *= 60
                         keyboard = [[InlineKeyboardButton("📹Watch Video on YouTube", url=video_url)]]
                         inline_keyboard = InlineKeyboardMarkup(keyboard)
-
+                        context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
                         with open(thumb_name, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
                                         context.bot.send_audio(
                                             chat_id=update.effective_chat.id,
@@ -1553,8 +1552,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                             duration=dur  # Duration in seconds
                                         )
                        
-                        context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
-
+                        
                 except Exception as e:
                         message.edit_text(
                             f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » <a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a>  💕</b>\n<b>ᴇʀʀᴏʀ :</b> <i>{e}</i>",parse_mode='HTML')
