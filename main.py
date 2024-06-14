@@ -1568,6 +1568,33 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         thread = threading.Thread(target=search_and_download)
         thread.start()        
 
+def off(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    if user_id == OWNER_ID:
+        if len(context.args) > 0 and context.args[0] == SPECIAL_PASSWORD:
+            update.message.reply_text("Bot is shutting down...")
+            updater.stop()
+        
+        else:
+            update.message.reply_text("Incorrect password.")
+    else:
+        update.message.reply_text("You are not authorized to shut down this bot.")
+
+def generate_password():
+    return secrets.token_urlsafe(16)
+
+def __init__(update):
+        # Get the current time when the bot starts
+        START_TIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        start_message = (
+            f"<b>Bot Started</b>\n"
+            f"Start Time: <code>{START_TIME}</code>\n"
+            f"Your shutdown password is: <code>{SPECIAL_PASSWORD}</code>"
+        )
+        updater.bot.send_message(chat_id=OWNER_ID, text=start_message, parse_mode=ParseMode.HTML)
+
+
 
 def main() -> None:
     logger.info("Bot starting!")
@@ -1631,6 +1658,7 @@ def main() -> None:
 
     # Start the Bot
     updater.start_polling()
+    __init__() # send a special password to the owner 
 
     # Run the bot until you press Ctrl-C
     updater.idle()
@@ -1638,5 +1666,7 @@ def main() -> None:
 if __name__ == '__main__':
     DB = FireBaseDB()
     command_logger =rate_limit.CommandLogger()  # safety limit 
+    # Generate a unique password when the bot starts
+    SPECIAL_PASSWORD = generate_password()
     keep_alive()
     main()
