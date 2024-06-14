@@ -1602,7 +1602,7 @@ def __init__(update):
             f"Start Time: <code>{START_TIME}</code>\n"
             f"Your shutdown password is: <code>{SPECIAL_PASSWORD}</code>"
         )
-        updater.bot.send_message(chat_id=OWNER_ID, text=start_message, parse_mode=ParseMode.HTML)
+        update.bot.send_message(chat_id=OWNER_ID, text=start_message, parse_mode=ParseMode.HTML)
 
 
 
