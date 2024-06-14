@@ -1561,8 +1561,8 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                         
                 except Exception as e:
                         error_message = (
-                                f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » "
-                                f"<a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a>  💕</b>\n"
+                                f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » </b>"
+                                f"<a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a> 💕\n"
                                 f"<b>ᴇʀʀᴏʀ :</b> <i>{html.escape(str(e))}</i>"
                             )
                         context.bot.send_message(chat_id=update.message.chat.id, text=error_message, parse_mode=ParseMode.HTML)
@@ -1637,6 +1637,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("unban", unblock_user_command, pass_args=True))
     dispatcher.add_handler(CommandHandler("ban_ids", all_blocked_users))
     dispatcher.add_handler(CommandHandler("ping", ping))
+    dispatcher.add_handler(CommandHandler("off", off))
     
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
