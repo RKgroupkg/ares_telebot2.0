@@ -1,4 +1,5 @@
 import telegram
+import sys
 from telegram import Update,ChatAction,InlineKeyboardMarkup, InlineKeyboardButton,ParseMode # version = 12.8
 from telegram.error import Conflict
 from telegram.ext import Updater, MessageHandler, Filters, CallbackContext,CommandHandler,CallbackQueryHandler
@@ -1430,153 +1431,156 @@ def ping(update: Update, context: CallbackContext) -> None:
 
     # Send the response message with HTML parsing
     update.message.reply_text(response, parse_mode=ParseMode.HTML)
-
 def Youtube(update: Update, context: CallbackContext) -> None:
-        if DB.is_user_blocked(str(update.message.from_user.id)):
-                logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
-                return
-        if not command_logger.check_rate_limit(update.effective_user.id):
-                update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
-                return
-        chat_id = update.effective_chat.id
-        search = " ".join(context.args)
-        if not search:
-                update.message.reply_text(f"Eʀʀᴏʀ 400! ɴᴏ sᴇᴀʀᴄʜ ᴏ̨ᴜᴇʀʏ ᴘʀᴏᴠɪᴅᴇᴅ",reply_markup=Invalid_arg)
-                return 
-        message_ = update.message
-        user_id = message_.from_user.id
-        user_name = message_.from_user.first_name
-        message = update.message.reply_text("<b>» sᴇᴀʀᴄʜɪɴɢ, ᴩʟᴇᴀsᴇ ᴡᴀɪᴛ...</b>",parse_mode="HTML")
-        message_id = message.message_id
-        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
-        def search_and_download():
-                ydl_opts = {"format": "bestaudio[ext=m4a]"}
-                user_info = f"<a href='tg://user?id={str(user_id)}>{user_name}</a> "
-                try:
-                        results = YoutubeSearch(search, max_results=1).to_dict()
-                        link = f"https://youtube.com{results[0]['url_suffix']}"
-                        # print(results)
-                        title = results[0]["title"][:40]
-                        thumbnail = results[0]["thumbnails"][0]
-                        thumb_name = f"thumb{str(uuid.uuid4())}.jpg"
-                        video_url = f"https://youtube.com{results[0]['url_suffix']}"
-                        thumb = requests.get(thumbnail, allow_redirects=True)
-                        channel_name= results[0].get("channel", "Unknown Channel")  
-                        open(thumb_name, "wb").write(thumb.content)
-                        
-                        duration = results[0]["duration"]
-                        results[0]["url_suffix"]
-                        views = results[0]["views"]
-                except Exception as e:
-                         message.edit_text("<b>😴 sᴏɴɢ ɴᴏᴛ ғᴏᴜɴᴅ ᴏɴ ʏᴏᴜᴛᴜʙᴇ.</b>\n\n» ᴍᴀʏʙᴇ Tʀʏ ᴡɪᴛʜ ᴅɪғғʀᴇɴᴛ ᴡᴏʀᴅs!",parse_mode="HTML")
-                         return
-                context.bot.delete_message(chat_id=chat_id, message_id=message_id) # dlete that message 
-                text = "» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ...\n\nᴩʟᴇᴀsᴇ ᴡᴀɪᴛ..."
-                if os.path.exists(thumb_name): # send all new message with thumb nail or logo image 
-                        with open(thumb_name, "rb") as photo:
-                                photo_message = context.bot.send_photo(
-                                                    chat_id=update.effective_chat.id,
-                                                    photo=photo,
-                                                    caption=text,
-                                                    parse_mode='HTML'
-                                                )
-                else:
-                        with open(LOGO_PATH, "rb") as photo:
-                                photo_message =  context.bot.send_photo(
-                                            chat_id=update.effective_chat.id,
-                                            photo=photo,
-                                            caption=text,
-                                            reply_markup=reply_markup,
-                                            parse_mode='HTML'
-                                        )
-                        
-                last_update_time = datetime.datetime.now()
-
-                def progress_hook(d):
-                        nonlocal last_update_time
-                
-                        if d['status'] == 'downloading':
-                            now = datetime.datetime.now()
-                            if now - last_update_time > timedelta(seconds=10):  # Throttle updates to every 5 seconds
-                                percent = d['_percent_str']
-                                speed = d['_speed_str']
-                                eta = d['_eta_str']
-                
-                                # Generate the loading bar
-                                total_bars = 20
-                                filled_bars = int(float(d['_percent_str'].replace('%', '')) / 100 * total_bars)
-                                loading_bar = '█' * filled_bars + '░' * (total_bars - filled_bars)
-                                new_caption = (
-                                        f"Qᴜᴇʀʏ: {html.escape(search)}\n"
-                                        f"Tɪᴛʟᴇ: {html.escape(title)}\n"
-                                        f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_info}\n\n"
-                                        "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
-                                        f"Pʀᴏɢʀᴇss: {percent}\n {loading_bar}\n"
-                                        f"Sᴘᴇᴇᴅ: {speed}\n"
-                                        f"ᴇᴛᴀ: {eta}"
-                                        )
-
-                                  
-                                context.bot.edit_message_caption(
-                                            chat_id=photo_message.chat.id,
-                                            message_id=photo_message.message_id,
-                                            caption=new_caption,
-                                            parse_mode='HTML'
-                                        )
-                                last_update_time = now
-                
-                ydl_opts['progress_hooks'] = [progress_hook]
-
-                try:
-                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:       
-                                info_dict = ydl.extract_info(link, download=True)
-                                audio_file = ydl.prepare_filename(info_dict)
-                                ydl.process_info(info_dict)
-                        rep = (
-                            f"<b>ᴛɪᴛʟᴇ :</b> <i>{html.escape(title[:25])}</i>\n"
-                            f"<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> <i>{duration}</i>\n"
-                            f"<b>ᴠɪᴇᴡs :</b> <i>{views}</i>\n"
-                            f"<b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »</b> {user_info}"
-                        )
-                        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
-                        secmul, dur, dur_arr = 1, 0, duration.split(":")
-                        for i in range(len(dur_arr) - 1, -1, -1):
-                                dur += int(dur_arr[i]) * secmul
-                                secmul *= 60
-                        keyboard = [[InlineKeyboardButton("📹Watch Video on YouTube", url=video_url)]]
-                        inline_keyboard = InlineKeyboardMarkup(keyboard)
-                        context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
-                        with open(thumb_name, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
-                                        context.bot.send_audio(
-                                            chat_id=update.effective_chat.id,
-                                            audio=audio_file,
-                                            thumb=thumb_file,
-                                            caption=rep,
-                                            parse_mode='HTML',
-                                            title=title,
-                                            performer=channel_name,
-                                            duration=dur  # Duration in seconds
-                                        )
-                       
-                        
-                except Exception as e:
-                        error_message = (
-                                f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » </b>"
-                                f"<a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a> 💕\n"
-                                f"<b>ᴇʀʀᴏʀ :</b> <i>{html.escape(str(e))}</i>"
-                            )
-                        context.bot.send_message(chat_id=update.message.chat.id, text=error_message, parse_mode=ParseMode.HTML)
-                        logger.error(e)
+    if DB.is_user_blocked(str(update.message.from_user.id)):
+        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
+        return
+    
+    if not command_logger.check_rate_limit(update.effective_user.id):
+        update.message.reply_text("You've exceeded the command rate limit. Please try again after one minute.")
+        return
+    
+    chat_id = update.effective_chat.id
+    search = " ".join(context.args)
+    
+    if not search:
+        update.message.reply_text("Error 400! No search query provided.")
+        return 
+    
+    user_id = update.message.from_user.id
+    user_name = update.message.from_user.first_name
+    
+    message = update.message.reply_text("<b>Searching, please wait...</b>", parse_mode="HTML")
+    message_id = message.message_id
+    
+    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
+    
+    def search_and_download():
+        ydl_opts = {"format": "bestaudio[ext=m4a]"}
+        user_info = f"<a href='tg://user?id={str(user_id)}'>{html.escape(user_name)}</a>"
         
-                try:
-                        os.remove(audio_file)
-                        os.remove(thumb_name)
-                except Exception as e:
-                        logger.error(e)
-        # Start the search and download process in a separate thread
-        command_logger.log_command(update.effective_user.id,'/yt',3) # intensity is five for heavy rate limition 
-        thread = threading.Thread(target=search_and_download)
-        thread.start()        
+        try:
+            results = YoutubeSearch(search, max_results=1).to_dict()
+            link = f"https://youtube.com{results[0]['url_suffix']}"
+            title = html.escape(results[0]["title"][:40])
+            thumbnail = results[0]["thumbnails"][0]
+            thumb_name = f"thumb{str(uuid.uuid4())}.jpg"
+            video_url = f"https://youtube.com{results[0]['url_suffix']}"
+            
+            thumb = requests.get(thumbnail, allow_redirects=True)
+            open(thumb_name, "wb").write(thumb.content)
+            
+            duration = results[0]["duration"]
+            views = results[0]["views"]
+            channel_name = results[0].get("channel", "Unknown Channel")
+            
+        except Exception as e:
+            message.edit_text("<b>😴 Song not found on YouTube.</b>\n\nMaybe try with different keywords.", parse_mode="HTML")
+            logger.error(f"Error during YouTube search: {str(e)}")
+            return
+        
+        context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+        text = "Downloading...\n\nPlease wait..."
+        
+        if os.path.exists(thumb_name):
+            with open(thumb_name, "rb") as photo:
+                photo_message = context.bot.send_photo(
+                    chat_id=update.effective_chat.id,
+                    photo=photo,
+                    caption=text,
+                    parse_mode='HTML'
+                )
+        else:
+            with open(LOGO_PATH, "rb") as photo:
+                photo_message =  context.bot.send_photo(
+                    chat_id=update.effective_chat.id,
+                    photo=photo,
+                    caption=text,
+                    parse_mode='HTML'
+                )
+        
+        last_update_time = datetime.datetime.now()
+        
+        def progress_hook(d):
+            nonlocal last_update_time
+            
+            if d['status'] == 'downloading':
+                now = datetime.datetime.now()
+                if now - last_update_time > datetime.timedelta(seconds=10):
+                    percent = d['_percent_str']
+                    speed = d['_speed_str']
+                    eta = d['_eta_str']
+                    
+                    total_bars = 20
+                    filled_bars = int(float(d['_percent_str'].replace('%', '')) / 100 * total_bars)
+                    loading_bar = '█' * filled_bars + '░' * (total_bars - filled_bars)
+                    
+                    new_caption = (
+                        f"Query: {html.escape(search)}\n"
+                        f"Title: {title}\n"
+                        f"Requested by: {user_info}\n\n"
+                        "Downloading...\n\n"
+                        f"Progress: {percent}\n {loading_bar}\n"
+                        f"Speed: {speed}\n"
+                        f"ETA: {eta}"
+                    )
+                    
+                    context.bot.edit_message_caption(
+                        chat_id=photo_message.chat.id,
+                        message_id=photo_message.message_id,
+                        caption=new_caption,
+                        parse_mode='HTML'
+                    )
+                    last_update_time = now
+        
+        ydl_opts['progress_hooks'] = [progress_hook]
+        
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:       
+                info_dict = ydl.extract_info(link, download=True)
+                audio_file = ydl.prepare_filename(info_dict)
+                ydl.process_info(info_dict)
+            
+            rep = (
+                f"<b>Title:</b> <i>{title}</i>\n"
+                f"<b>Duration:</b> <i>{duration}</i>\n"
+                f"<b>Views:</b> <i>{views}</i>\n"
+                f"<b>Requested by:</b> {user_info}"
+            )
+            
+            context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
+            
+            with open(thumb_name, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
+                context.bot.send_audio(
+                    chat_id=update.effective_chat.id,
+                    audio=audio_file,
+                    thumb=thumb_file,
+                    caption=rep,
+                    parse_mode='HTML',
+                    title=title,
+                    performer=channel_name,
+                    duration=int(duration.split(':')[0]) * 60 + int(duration.split(':')[1])  # Convert duration to seconds
+                )
+        
+        except Exception as e:
+            error_message = (
+                f"<b>Downloading error, report this at</b> "
+                f"<a href='t.me/AresChatBotAi'>AresOfficialGroup chat</a> 💕\n"
+                f"<b>Error:</b> <i>{html.escape(str(e))}</i>"
+            )
+            context.bot.send_message(chat_id=update.message.chat.id, text=error_message, parse_mode=ParseMode.HTML)
+            logger.error(f"Error during download: {str(e)}")
+        
+        try:
+            os.remove(audio_file)
+            os.remove(thumb_name)
+        except Exception as e:
+            logger.error(f"Error cleaning up files: {str(e)}")
+    
+    # Start the search and download process in a separate thread
+    command_logger.log_command(update.effective_user.id, '/yt', 3)  # Log the command with intensity 3 (moderate)
+    thread = threading.Thread(target=search_and_download)
+    thread.start()    
 
 # Command handler for /off command
 def off(update: Update, context: CallbackContext):
