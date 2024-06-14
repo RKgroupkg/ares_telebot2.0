@@ -1561,6 +1561,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                     parse_mode='HTML',
                     title=title,
                     performer=channel_name,
+                    reply_markup=inline_keyboard,
                     duration=int(duration.split(':')[0]) * 60 + int(duration.split(':')[1])  # Convert duration to seconds
                 )
         
