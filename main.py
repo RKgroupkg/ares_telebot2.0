@@ -1550,7 +1550,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             
             context.bot.delete_message(chat_id=update.effective_chat.id, message_id=photo_message.message_id)
             
-            with open(thumb_name, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
+            with open(audio_file, "rb") as audio_file, open(thumb_name, "rb") as thumb_file:
                 context.bot.send_audio(
                     chat_id=update.effective_chat.id,
                     audio=audio_file,
