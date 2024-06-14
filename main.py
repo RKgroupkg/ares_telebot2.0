@@ -1450,7 +1450,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
         def search_and_download():
                 ydl_opts = {"format": "bestaudio[ext=m4a]"}
-                user_info = "[" + user_name + "](tg://user?id=" + str(user_id) + ")"
+                user_info = f"<a href='tg://user?id={str(user_id)}>{user_name}</a> "
                 try:
                         results = YoutubeSearch(search, max_results=1).to_dict()
                         link = f"https://youtube.com{results[0]['url_suffix']}"
@@ -1508,9 +1508,9 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 new_caption = (
                                             f"Qᴜᴇʀʏ: {search}\n"                  # Displaying the search query
                                             f"Tɪᴛʟᴇ: {html.escape(title)}\n"      # Displaying the title, escaping HTML entities for safety
-                                            f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_name} \n\n"  # Displaying the requester's name
+                                            f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_info} \n\n"  # Displaying the requester's name
                                             "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"             # Informing about downloading in progress
-                                            f"Pʀᴏɢʀᴇss: <i>{percent}</i> {loading_bar}\n"  # Displaying download progress
+                                            f"Pʀᴏɢʀᴇss: <i>{percent}</i>\n {loading_bar}\n"  # Displaying download progress
                                             f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"            # Displaying download speed
                                             f"ᴇᴛᴀ: <b>{eta}</b>"                  # Displaying estimated time of arrival
                                         )
@@ -1532,7 +1532,8 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                 info_dict = ydl.extract_info(link, download=True)
                                 audio_file = ydl.prepare_filename(info_dict)
                                 ydl.process_info(info_dict)
-                        rep = f"<b>ᴛɪᴛʟᴇ :</b>{title[:25]}\n<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> <i>{duration}</i>\n<b>ᴠɪᴇᴡs :</b> <i>{views}</i>\n<b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »</b> {user_info}"
+                        rep = f"<b>ᴛɪᴛʟᴇ :</b><i>{html.escape(title[:25])}</i>\n<b>ᴅᴜʀᴀᴛɪᴏɴ :</b> <i>{duration}</i>\n<b>ᴠɪᴇᴡs :</b> <i>{views}</i>\n<b>ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ »</b> {user_info}"
+                        context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.RECORD_AUDIO)
                         secmul, dur, dur_arr = 1, 0, duration.split(":")
                         for i in range(len(dur_arr) - 1, -1, -1):
                                 dur += int(dur_arr[i]) * secmul
@@ -1556,8 +1557,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
 
                 except Exception as e:
                         message.edit_text(
-                            f"**» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » [AresOfficalGroup ᴄʜᴀᴛ](t.me/AresChatBotAi) 💕**\n\**ᴇʀʀᴏʀ :** {e}",parse_mode='MarkdownV2'
-                        )
+                            f"<b>» ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ ᴇʀʀᴏʀ, ʀᴇᴩᴏʀᴛ ᴛʜɪs ᴀᴛ​ » <a href='t.me/AresChatBotAi'>AresOfficalGroup ᴄʜᴀᴛ</a>  💕</b>\n<b>ᴇʀʀᴏʀ :</b> <i>{e}</i>",parse_mode='HTML')
                         logger.error(e)
         
                 try:
