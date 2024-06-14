@@ -1667,7 +1667,7 @@ def main() -> None:
 
     # Start the Bot
     updater.start_polling()
-    __init__() # send a special password to the owner 
+    __init__(updater) # send a special password to the owner 
 
     # Run the bot until you press Ctrl-C
     updater.idle()
