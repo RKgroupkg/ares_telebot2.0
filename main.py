@@ -1511,9 +1511,9 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                                         f"Tɪᴛʟᴇ: {html.escape(title)}\n"
                                         f"ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ​ » {user_info}\n\n"
                                         "📥 Dᴏᴡɴʟᴏᴀᴅɪɴɢ....\n\n"
-                                        f"Pʀᴏɢʀᴇss: <i>{percent}</i>\n {loading_bar}\n"
-                                        f"Sᴘᴇᴇᴅ: <b>{speed}</b>\n"
-                                        f"ᴇᴛᴀ: <b>{eta}</b>"
+                                        f"Pʀᴏɢʀᴇss: {percent}\n {loading_bar}\n"
+                                        f"Sᴘᴇᴇᴅ: {speed}\n"
+                                        f"ᴇᴛᴀ: {eta}"
                                         )
 
                                   
@@ -1578,13 +1578,17 @@ def Youtube(update: Update, context: CallbackContext) -> None:
         thread = threading.Thread(target=search_and_download)
         thread.start()        
 
+# Command handler for /off command
 def off(update: Update, context: CallbackContext):
-    user_id = str(update.message.from_user.id)
-    if user_id == str(OWNER_ID):
+    user_id = update.message.from_user.id
+    
+    # Check if the user is authorized to shut down the bot
+    if user_id == OWNER_ID:
+        # Check if the correct special password is provided as an argument
         if len(context.args) > 0 and context.args[0] == SPECIAL_PASSWORD:
-            update.message.reply_text(f"Bot is shutting down...\n\n session_info:{SPECIAL_PASSWORD}")
-            updater.stop()
-        
+            update.message.reply_text(f"Bot is shutting down...\n\nSession info: {SPECIAL_PASSWORD}")
+            # Perform any cleanup or final tasks here if needed
+            sys.exit(0)  # Exit the script with status code 0 (success)
         else:
             update.message.reply_text("Incorrect password.")
     else:
