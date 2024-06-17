@@ -3,6 +3,8 @@ OWNER_ID = 6258187891
 ADMIN_CHAT_ID = -1002182025326
 SUPPORT_CHAT_ID = -1002201688413
 
+video_urls = {}
+MAX_AUDIO_LIMIT = 15*60 
 
 system_instruction = """
 I. Introduction
