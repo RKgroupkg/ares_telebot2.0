@@ -1574,7 +1574,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
-    command_logger.log_command(update.effective_user.id,'/yt'3)
+    command_logger.log_command(update.effective_user.id,'/yt',3)
     search = " ".join(context.args)
     if not search:
         update.message.reply_text("Error: No search query provided.")
