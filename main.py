@@ -1652,7 +1652,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 photo=thumbnail,
                 caption=f"<b>Title:</b>    <i>{title}</i>\n"
                         f"<b>Duration:</b> <i>{duration}</i>\n"
-                        f"<b>Views:</b>    <i>{beautify_views(views)}</i>\n"
+                        f"<b>Views:</b>    <i>{escape.beautify_views(views)}</i>\n"
                         f"<b>Channel:</b>  <i>{channel_name}</i>\n\n"
                         "<b>Select an option to download:</b>",
                 parse_mode=ParseMode.HTML,
