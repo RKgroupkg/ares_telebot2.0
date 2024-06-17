@@ -136,6 +136,18 @@ def escape(text, flag=0):
     text = find_lines_with_char(text, '`', 5)
     return text
 
+def beautify_views(views):
+    views =''.join(filter(str.isdigit, views))
+
+    views = int(views)
+    if views < 1000:
+        return str(views)
+    elif views < 1_000_000:
+        return f"{views / 1000:.1f} <b>k</b>"
+    elif views < 1_000_000_000:
+        return f"{views / 1_000_000:.1f} <b>m</b>"
+    else:
+        return f"{views / 1_000_000_000:.1f} <b>b</b>"
 
 
 if __name__ == '__main__':
