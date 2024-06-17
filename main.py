@@ -144,9 +144,6 @@ def _home(update: Update, context: CallbackContext):
 
 # Function to handle callback queries
 def button_click(update: Update, context: CallbackContext):
-    if DB.is_user_blocked(str(update.message.from_user.id)):
-        logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
-        return
 
 
     query = update.callback_query
