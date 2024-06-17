@@ -27,6 +27,7 @@ from logs import logger
 from bing_image_downloader import downloader 
 from utils.FireDB import FireBaseDB
 from utils import escape,rate_limit
+
 import shutil
 import jsonpickle
 
@@ -202,7 +203,7 @@ def Youtube_music(update: Update, context: CallbackContext) -> None:
     rep = (
                     f"<b>Title:</b> <i>{title}</i>\n"
                     f"<b>Duration:</b> <i>{duration}</i>\n"
-                    f"<b>Views:</b> <i>{beautify_views(views)}</i>\n"
+                    f"<b>Views:</b> <i>{escape.beautify_views(views)}</i>\n"
                     f"<b>Requested by:</b> {user_info}"
                 )
     
