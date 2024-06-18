@@ -1611,7 +1611,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=thumbnail,
-                caption=f"<b>Title:</b>     <i>{html.esacpe(title)}</i>\n"
+                caption=f"<b>Title:</b>     <i>{html.escape(title)}</i>\n"
                         f"<b>Duration:</b>  <i>{duration}</i>\n"
                         f"<b>Views:</b>     <i>{escape.beautify_views(views)}</i>\n"
                         f"<b>Channel:</b>   <i><a href='https://www.youtube.com/@{channel_name}'>{channel_name}</a></i>\n\n"
