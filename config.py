@@ -358,6 +358,13 @@ In this case, dog(animal) is the argument for the /wiki command.
 Note: If you don't pass the arguments correctly, you will encounter an error (Error 400). So, make sure to include the necessary arguments to avoid any issues! 
       
       
+""",
+      "command_wiki_disambiguationerror":"""
+<b>What is Disambiguation Error❓ <b>\n\n
+<b>Disambiguation</b> errors on Wikipedia happen when a search term has multiple meanings, confusing users.\n To solve this, Wikipedia uses <b>disambiguation</b> pages that list different meanings of a term. For example, "Jaguar" could mean the animal, the car brand, or the sports team. Users then click the correct option to find the relevant article, ensuring clarity. 📚
+
+
+
 """
       
         
