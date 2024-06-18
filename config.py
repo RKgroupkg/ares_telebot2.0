@@ -121,7 +121,7 @@ safety_settings = [
 # Constants for command types
 COMMANDS, PROMPTING, EXTRA_INFO, SUPPORT = range(4)
 # Declare the file path at the top of the script
-LOGO_PATH = r"assets/ares_logo3.jpeg"
+LOGO_PATH = r"assets/help_img.jpeg"
 ARES_VERSION = "1.4.5"
 
 INFO_help = {
