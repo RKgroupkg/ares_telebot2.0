@@ -365,6 +365,12 @@ Note: If you don't pass the arguments correctly, you will encounter an error (Er
 
 
 
+""",
+      "command_music_limit_error":"""
+<b>What is the limit? </b>\n\n
+<b>Limitation:</b> Currently, our bot has a <strong>15-minute duration limit</strong> for downloading audio or music. 🎵 This is to protect the bot from abuse, although most songs are comfortably within this limit.
+
+
 """
       
         
