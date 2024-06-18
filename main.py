@@ -27,6 +27,14 @@ from logs import logger
 from bing_image_downloader import downloader 
 from utils.FireDB import FireBaseDB
 from utils import escape,rate_limit
+from utils.inline import (
+        command_limit_inline,
+        Invalid_arg,
+        Admin_error,
+        DisambiguationError,
+        music_limit_error,
+        
+)
 
 import shutil
 import jsonpickle
@@ -37,28 +45,6 @@ from config import *
 PASSWORD = os.environ.get('password')
 
 chat_histories ={}
-command_limit_inline_list = [
-        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
-        [InlineKeyboardButton("what is command limit rate❓", callback_data="Command_limit_rate")],
-    ]   
-command_limit_inline = InlineKeyboardMarkup(command_limit_inline_list)
-
-Invalid_arg_list = [
-        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
-        [InlineKeyboardButton("Help❓", callback_data="command_arg")],
-    ]   
-Invalid_arg = InlineKeyboardMarkup(Invalid_arg_list)
-
-Admin_error_list = [
-        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
-        [InlineKeyboardButton("Who are admin❓", callback_data="command_who_are_admin")],
-    ]   
-Admin_error = InlineKeyboardMarkup(Admin_error_list)
-DisambiguationError_list = [
-        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")],
-        [InlineKeyboardButton("What is Disambiguation Error❓", callback_data="command_wiki_disambiguationerror")],
-    ]   
-DisambiguationError = InlineKeyboardMarkup(DisambiguationError_list) # this feature still not added .
 api_key = os.environ.get('gemnie_api')
 genai.configure(api_key=api_key)
 telegram_bot_token = os.environ.get('telegram_api')
@@ -175,6 +161,8 @@ def button_click(update: Update, context: CallbackContext):
 def Youtube_music(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
+    message_id = query.message.message_id  # Get the ID of the message to delete
+
 
 
     user_name = query.from_user.first_name
@@ -198,9 +186,9 @@ def Youtube_music(update: Update, context: CallbackContext) -> None:
 
     
     rep = (
-                    f"<b>Title:</b> <i>{title}</i>\n"
-                    f"<b>Duration:</b> <i>{duration}</i>\n"
-                    f"<b>Views:</b> <i>{escape.beautify_views(views)}</i>\n"
+                    f"<b>Title:</b>        <i>{title}</i>\n"
+                    f"<b>Duration:</b>     <i>{duration}</i>\n"
+                    f"<b>Views:</b>        <i>{escape.beautify_views(views)}</i>\n"
                     f"<b>Requested by:</b> {user_info}"
                 )
     
@@ -237,7 +225,7 @@ def Youtube_music(update: Update, context: CallbackContext) -> None:
             "nocheckcertificate": True,
             "http_chunk_size": 10485760,
             "progress_hooks": [progress_hook],
-            "external_downloader_args": ["-x", "20", "-k", "1M"]  # 16 connections, 1MB chunks
+            "external_downloader_args": ["-x", "20", "-k", "1M"]  # 20 connections, 1MB chunks
         }
 
 
@@ -255,6 +243,7 @@ def Youtube_music(update: Update, context: CallbackContext) -> None:
     
             
                 context.bot.send_chat_action(chat_id=query.message.chat_id, action="upload_" + ("audio" if action == "audio" else "video"))
+                context.bot.delete_message(chat_id=query.message.chat_id, message_id=message_id)
 
                 with open(file_name, "rb") as file:
                     if action == "audio":
@@ -1511,16 +1500,6 @@ def all_blocked_users(update: Update, context: CallbackContext) -> None:
   update.message.reply_text(f"Usᴇʀ ᴛʜᴀᴛ ᴀʀᴇ ᴜɴʙʟᴏᴄᴋᴇᴅ: {blocked_users}", parse_mode=ParseMode.HTML)
 
 
-# Function to get network speed
-def get_network_speed():
-    net_io_1 = psutil.net_io_counters()
-    time.sleep(1)  # wait for a second
-    net_io_2 = psutil.net_io_counters()
-
-    bytes_sent_per_sec = net_io_2.bytes_sent - net_io_1.bytes_sent
-    bytes_recv_per_sec = net_io_2.bytes_recv - net_io_1.bytes_recv
-
-    return bytes_sent_per_sec, bytes_recv_per_sec
 
 # Define the /ping command handler
 def ping(update: Update, context: CallbackContext) -> None:
@@ -1536,14 +1515,6 @@ def ping(update: Update, context: CallbackContext) -> None:
     used_memory = memory_info.used / (1024 ** 3)  # Convert bytes to GB
     memory_percent = memory_info.percent
 
-    # Get network speed
-    bytes_sent_per_sec, bytes_recv_per_sec = get_network_speed()
-
-    # Convert bytes per second to Mbps
-    bytes_to_mbps = 8 / (1024 ** 2)  # Convert bytes/sec to megabits/sec
-    sent_speed_mbps = bytes_sent_per_sec * bytes_to_mbps
-    recv_speed_mbps = bytes_recv_per_sec * bytes_to_mbps
-
     # Create the response message
     response = (
         "<pre>"
@@ -1552,8 +1523,6 @@ def ping(update: Update, context: CallbackContext) -> None:
         f"Total Memory: {total_memory:.2f} GB\n"
         f"Available Memory: {available_memory:.2f} GB\n"
         f"Used Memory: {used_memory:.2f} GB ({memory_percent}%)\n"
-        f"Upload Speed: {sent_speed_mbps:.2f} Mbps\n"
-        f"Download Speed: {recv_speed_mbps:.2f} Mbps"
         "</pre>"
     )
 
@@ -1622,18 +1591,13 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             print(f"data:{result}")
             print(f"Total time :{time_to_seconds(duration)}")
             if time_to_seconds(duration) > MAX_AUDIO_LIMIT:
-                keyboard =[
-                        [InlineKeyboardButton("❌ᴄʟᴏsᴇ", callback_data="close")]
-                          ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                message.edit_text(f"⚠️ Unfortunately, the song duration ({duration}) exceeds our current limit. Try searching with different keywords to find a shorter song.",reply_markup=reply_markup)
-
+                message.edit_text(f"⚠️ Unfortunately, the song duration ({duration}) exceeds our current limit. Try searching with different keywords to find a shorter song.",reply_markup=music_limit_error)
                 return
             views = result["views"]
             channel_name = result.get("channel", "Unknown Channel")
             video_uuid = str(uuid.uuid4())
             video_urls[video_uuid] = result
-
+            logger.log(f"userId:{update.message.from_user.id} requested /yt {search}")
             thumbnail = result["thumbnails"][0]
             keyboard = [
                 [
@@ -1647,10 +1611,10 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             context.bot.send_photo(
                 chat_id=update.effective_chat.id,
                 photo=thumbnail,
-                caption=f"<b>Title:</b>    <i>{title}</i>\n"
-                        f"<b>Duration:</b> <i>{duration}</i>\n"
-                        f"<b>Views:</b>    <i>{escape.beautify_views(views)}</i>\n"
-                        f"<b>Channel:</b>  <i>{channel_name}</i>\n\n"
+                caption=f"<b>Title:</b>     <i>{html.esacpe(title)}</i>\n"
+                        f"<b>Duration:</b>  <i>{duration}</i>\n"
+                        f"<b>Views:</b>     <i>{escape.beautify_views(views)}</i>\n"
+                        f"<b>Channel:</b>   <i><a href='https://www.youtube.com/@{channel_name}'>{channel_name}</a></i>\n\n"
                         "<b>Select an option to download:</b>",
                 parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup
