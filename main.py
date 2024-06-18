@@ -1540,7 +1540,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
-    command_logger.log_command(update.effective_user.id,'/yt',3)
+    command_logger.log_command(update.effective_user.id,'/yt',5)
     search = " ".join(context.args)
     if not search:
         update.message.reply_text("Error: No search query provided.")
@@ -1572,12 +1572,12 @@ def Youtube(update: Update, context: CallbackContext) -> None:
                 minutes,seconds = time
                 total_seconds = int(minutes) * 60 + int(seconds)
             else:
-                print("error! the hh:mm:ss fomat ha san error")
+                logger.error("error! the hh:mm:ss fomat ha san error")
                 return 0
             return total_seconds
         except Exception as e:
             # Handle invalid time string format
-            print(f"error while converting hh:mm:ss error:{e}")
+            logger.error(f"error while converting hh:mm:ss error:{e}")
             return 0  # Or raise a specific error message
 
 
@@ -1588,8 +1588,8 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             video_url = f"https://youtube.com{result['url_suffix']}"
             title = result["title"][:40]
             duration = result["duration"]
-            print(f"data:{result}")
-            print(f"Total time :{time_to_seconds(duration)}")
+            logger.info(f"userId:{update.message.from_user.id} requested /yt {search}")
+            logger.info(f"Total time :{time_to_seconds(duration)}")
             if time_to_seconds(duration) > MAX_AUDIO_LIMIT:
                 message.edit_text(f"⚠️ Unfortunately, the song duration ({duration}) exceeds our current limit. Try searching with different keywords to find a shorter song.",reply_markup=music_limit_error)
                 return
@@ -1597,7 +1597,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
             channel_name = result.get("channel", "Unknown Channel")
             video_uuid = str(uuid.uuid4())
             video_urls[video_uuid] = result
-            logger.log(f"userId:{update.message.from_user.id} requested /yt {search}")
+            
             thumbnail = result["thumbnails"][0]
             keyboard = [
                 [
