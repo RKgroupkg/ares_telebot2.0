@@ -896,7 +896,7 @@ def Token(update: Update, context: CallbackContext) -> None:
 def session_command(update: Update, context: CallbackContext) -> None:
     """Reports the total number of open chat sessions after password check."""
 
-        if not _is_admin_Auth(str(update.message.from_user.id)):  
+    if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
             
@@ -910,7 +910,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
 
 def session_info_command(update: Update, context: CallbackContext) -> None:
     """Reports the list of chat IDs for active chat sessions after password check."""
-        if not _is_admin_Auth(str(update.message.from_user.id)):  
+    if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
@@ -1025,7 +1025,7 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
     update: Update object from the Telegram Bot API.
     context: CallbackContext object from the Telegram Bot SDK.
   """
-      if not _is_admin_Auth(str(update.message.from_user.id)):  
+  if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
@@ -1549,7 +1549,7 @@ def _is_admin_Auth(id):
         
 # Define the /ping command handler
 def ping(update: Update, context: CallbackContext) -> None:
-        if not _is_admin_Auth(str(update.message.from_user.id)):
+    if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
