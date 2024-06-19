@@ -632,7 +632,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
 
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
   """REFRESH ALL USERS FROM CLOUD"""
-      if not _is_admin_Auth(str(update.message.from_user.id)):  
+  if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
   users_id = DB.get_usernames()
@@ -1409,7 +1409,7 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
 
 def gb_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to all users."""
-        if not _is_admin_Auth(str(update.message.from_user.id)):
+    if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1440,7 +1440,7 @@ def gb_broadcast(update: Update, context: CallbackContext) -> None:
 
 def specific_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to a specific user."""
-        if not _is_admin_Auth(str(update.message.from_user.id)):
+    if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1465,7 +1465,7 @@ def specific_broadcast(update: Update, context: CallbackContext) -> None:
 
 def block_user_command(update: Update, context: CallbackContext) -> None:
     """Block a user."""
-        if not _is_admin_Auth(str(update.message.from_user.id)):
+    if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1479,7 +1479,7 @@ def block_user_command(update: Update, context: CallbackContext) -> None:
 
 def unblock_user_command(update: Update, context: CallbackContext) -> None:
     """Unblock a user."""
-        if not _is_admin_Auth(str(update.message.from_user.id)):
+    if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1493,7 +1493,7 @@ def unblock_user_command(update: Update, context: CallbackContext) -> None:
 
 def all_blocked_users(update: Update, context: CallbackContext) -> None:
   """list of all blocked users"""
-      if not _is_admin_Auth(str(update.message.from_user.id)):
+  if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
   blocked_users = DB.blocked_users_cache
