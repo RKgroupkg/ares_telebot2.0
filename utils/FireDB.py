@@ -71,9 +71,14 @@ class FireBaseDB:
         user_data =  self.user_exists(userId)
         if not user_data:
             raise ValueError(f"User with ID '{userId}' not found")
+        if self.is_admin(userId):
+            isadmin = True
+        else:
+            isadmin = False 
         
         message = f''' 
 userID :          {userId}
+isAdmin?:         {isadmin}
 creation date :   {user_data["date"]}
 Prompt :          {user_data["system_instruction"]}
 '''
