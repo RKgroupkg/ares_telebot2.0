@@ -493,7 +493,7 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
           return
 
     
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
         
@@ -622,7 +622,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
   if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-  if not command_logger.check_rate_limit(str(update.effective_user.id)):
+  if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
@@ -632,7 +632,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
 
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
   """REFRESH ALL USERS FROM CLOUD"""
-  if not _is_admin_Auth(update.message.from_user.id):  
+      if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
   users_id = DB.get_usernames()
@@ -669,7 +669,7 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/refresh')
@@ -752,7 +752,7 @@ def history(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/history')
@@ -896,7 +896,7 @@ def Token(update: Update, context: CallbackContext) -> None:
 def session_command(update: Update, context: CallbackContext) -> None:
     """Reports the total number of open chat sessions after password check."""
 
-    if not _is_admin_Auth(update.message.from_user.id):  
+        if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
             
@@ -910,7 +910,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
 
 def session_info_command(update: Update, context: CallbackContext) -> None:
     """Reports the list of chat IDs for active chat sessions after password check."""
-    if not _is_admin_Auth(update.message.from_user.id):  
+        if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
@@ -1025,7 +1025,7 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
     update: Update object from the Telegram Bot API.
     context: CallbackContext object from the Telegram Bot SDK.
   """
-  if not _is_admin_Auth(update.message.from_user.id):  
+      if not _is_admin_Auth(str(update.message.from_user.id)):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
@@ -1097,7 +1097,7 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.")
         return
     command_logger.log_command(update.effective_user.id,'/image')
@@ -1150,7 +1150,7 @@ def wiki(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/wiki')
@@ -1233,7 +1233,7 @@ def imagine(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
       
@@ -1292,7 +1292,7 @@ def Google_search(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/google')
@@ -1409,7 +1409,7 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
 
 def gb_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to all users."""
-    if not _is_admin_Auth(update.message.from_user.id):
+        if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1440,7 +1440,7 @@ def gb_broadcast(update: Update, context: CallbackContext) -> None:
 
 def specific_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to a specific user."""
-    if not _is_admin_Auth(update.message.from_user.id):
+        if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1465,7 +1465,7 @@ def specific_broadcast(update: Update, context: CallbackContext) -> None:
 
 def block_user_command(update: Update, context: CallbackContext) -> None:
     """Block a user."""
-    if not _is_admin_Auth(update.message.from_user.id):
+        if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1479,7 +1479,7 @@ def block_user_command(update: Update, context: CallbackContext) -> None:
 
 def unblock_user_command(update: Update, context: CallbackContext) -> None:
     """Unblock a user."""
-    if not _is_admin_Auth(update.message.from_user.id):
+        if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1493,7 +1493,7 @@ def unblock_user_command(update: Update, context: CallbackContext) -> None:
 
 def all_blocked_users(update: Update, context: CallbackContext) -> None:
   """list of all blocked users"""
-  if not _is_admin_Auth(update.message.from_user.id):
+      if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
   blocked_users = DB.blocked_users_cache
@@ -1549,7 +1549,7 @@ def _is_admin_Auth(id):
         
 # Define the /ping command handler
 def ping(update: Update, context: CallbackContext) -> None:
-    if not _is_admin_Auth(update.message.from_user.id):
+        if not _is_admin_Auth(str(update.message.from_user.id)):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1583,7 +1583,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(str(update.effective_user.id)):
+    if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/yt',5)
