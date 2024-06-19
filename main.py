@@ -1470,7 +1470,7 @@ def block_user_command(update: Update, context: CallbackContext) -> None:
         return
 
     if len(context.args) != 1:
-        update.message.reply_text("Usᴀɢᴇ: /ʙʟᴏᴄᴋ <ᴜsᴇʀ_ɪᴅ>", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Usᴀɢᴇ: /ʙʟᴏᴄᴋ (ᴜsᴇʀ_ɪᴅ)", parse_mode=ParseMode.HTML)
         return
 
     user_id_to_block = context.args[0]
@@ -1484,7 +1484,7 @@ def unblock_user_command(update: Update, context: CallbackContext) -> None:
         return
 
     if len(context.args) != 1:
-        update.message.reply_text("Usᴀɢᴇ: /ᴜɴʙʟᴏᴄᴋ <ᴜsᴇʀ_ɪᴅ>", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Usᴀɢᴇ: /ᴜɴʙʟᴏᴄᴋ (ᴜsᴇʀ_ɪᴅ)", parse_mode=ParseMode.HTML)
         return
 
     user_id_to_unblock = context.args[0]
@@ -1507,7 +1507,7 @@ def add_admin_command(update: Update, context: CallbackContext) -> None:
         return
 
     if len(context.args) != 1:
-        update.message.reply_text("Usᴀɢᴇ: /add_admin <ᴜsᴇʀ_ɪᴅ>", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Usᴀɢᴇ: /add_admin (ᴜsᴇʀ_ɪᴅ)", parse_mode=ParseMode.HTML)
         return
 
     user_id_to_add = context.args[0]
@@ -1521,7 +1521,7 @@ def remove_admin_command(update: Update, context: CallbackContext) -> None:
         return
 
     if len(context.args) != 1:
-        update.message.reply_text("Usᴀɢᴇ: /rm_admin <ᴜsᴇʀ_ɪᴅ>", parse_mode=ParseMode.HTML)
+        update.message.reply_text("Usᴀɢᴇ: /rm_admin (ᴜsᴇʀ_ɪᴅ)", parse_mode=ParseMode.HTML)
         return
 
     user_id_to_remove = context.args[0]
@@ -1703,8 +1703,53 @@ def __init__(update):
         )
         update.bot.send_message(chat_id=OWNER_ID, text=start_message, parse_mode=ParseMode.HTML)
 
+def get_id(update: Update, context: CallbackContext):
+    message = update.effective_message
+    chat = update.effective_chat
+    msg = update.effective_message
 
+    try:
+        if context.args:
+            user_id = context.args[0]
+        elif message.reply_to_message:
+            user_id = message.reply_to_message.from_user.id
+        else:
+            user_id = message.from_user.id
 
+        if user_id:
+            if message.reply_to_message and message.reply_to_message.forward_from:
+                user1 = message.reply_to_message.from_user
+                user2 = message.reply_to_message.forward_from
+                msg.reply_text(
+                    f"<b>Telegram ID:</b>\n"
+                    f"• {user2.first_name} - <code>{user2.id}</code>\n"
+                    f"• {user1.first_name} - <code>{user1.id}</code>",
+                    parse_mode=ParseMode.HTML,
+                )
+            else:
+                user = context.bot.get_chat(user_id)
+                msg.reply_text(
+                    f"{user.first_name}'s ID is <code>{user.id}</code>",
+                    parse_mode=ParseMode.HTML,
+                )
+        else:
+            if chat.type == "private":
+                msg.reply_text(
+                    f"Your user ID is <code>{chat.id}</code>",
+                    parse_mode=ParseMode.HTML
+                )
+            else:
+                msg.reply_text(
+                    f"This group's ID is <code>{chat.id}</code>",
+                    parse_mode=ParseMode.HTML
+                )
+
+    except Exception as e:
+        msg.reply_text(
+            f"Error: {e}",
+            parse_mode=ParseMode.HTML
+        )
+            
 def main() -> None:
     logger.info("Bot starting!")
     updater = Updater(telegram_bot_token, use_context=True)
@@ -1725,6 +1770,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("start", home))
     dispatcher.add_handler(CommandHandler("bug", bug))
     dispatcher.add_handler(CommandHandler("info", INFO))
+    dispatcher.add_handler(CommandHandler("id", get_id))
     
     dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(CommandHandler("refresh", REFRESH))
