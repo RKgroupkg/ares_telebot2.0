@@ -493,7 +493,7 @@ def change_prompt(update: Update, context: CallbackContext) -> None:
           return
 
     
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
         
@@ -622,7 +622,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
   if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-  if not command_logger.check_rate_limit(update.effective_user.id):
+  if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
   logger.info(f"INFO command asked by :{update.message.from_user.username}")
@@ -669,7 +669,7 @@ def REFRESH(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/refresh')
@@ -752,7 +752,7 @@ def history(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
           logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
           return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/history')
@@ -1097,7 +1097,7 @@ def image_command_handler(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.")
         return
     command_logger.log_command(update.effective_user.id,'/image')
@@ -1150,7 +1150,7 @@ def wiki(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/wiki')
@@ -1233,7 +1233,7 @@ def imagine(update: Update, context: CallbackContext):
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
       
@@ -1292,7 +1292,7 @@ def Google_search(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/google')
@@ -1583,7 +1583,7 @@ def Youtube(update: Update, context: CallbackContext) -> None:
     if DB.is_user_blocked(str(update.message.from_user.id)):
         logger.info(f"Ignoring command from blocked user {str(update.message.from_user.id)}.")
         return
-    if not command_logger.check_rate_limit(update.effective_user.id):
+    if not command_logger.check_rate_limit(str(update.effective_user.id)):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
     command_logger.log_command(update.effective_user.id,'/yt',5)
