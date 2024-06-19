@@ -162,6 +162,7 @@ def Youtube_music(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
     query.answer()
     message_id = query.message.message_id  # Get the ID of the message to delete
+    command_logger.log_command(update.effective_user.id,'/yt download',2)
 
 
 
@@ -1586,11 +1587,13 @@ def Youtube(update: Update, context: CallbackContext) -> None:
     if not command_logger.check_rate_limit(update.effective_user.id):
         update.message.reply_text("Yᴏᴜ'ᴠᴇ ᴇxᴄᴇᴇᴅᴇᴅ ᴛʜᴇ ᴄᴏᴍᴍᴀɴᴅ ʀᴀᴛᴇ ʟɪᴍɪᴛ. Pʟᴇᴀsᴇ ᴛʀʏ ᴀɢᴀɪɴ ᴀғᴛᴇʀ ᴏɴᴇ ᴍɪɴ.",reply_markup=command_limit_inline)
         return
-    command_logger.log_command(update.effective_user.id,'/yt',5)
+    
     search = " ".join(context.args)
     if not search:
         update.message.reply_text("Error: No search query provided.")
         return
+    command_logger.log_command(update.effective_user.id,'/yt',2)
+
 
     message = update.message.reply_text("Searching, please wait...")
 
