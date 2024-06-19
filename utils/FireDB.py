@@ -114,6 +114,22 @@ Prompt :          {user_data["system_instruction"]}
     def is_admin(self, userId):
         return userId in self.admins_users
 
+    def add_admin(self, userId):
+        try:
+            self.INFO_ADMIN.update({userId: True})
+            self.admins_users.add(userId)
+            logger.info(f"User {userId} has been added as admin.")
+        except Exception as e:
+            logger.error(f"Error adding admin user {userId}: {e}")
+
+    def remove_admin(self, userId):
+        try:
+            self.INFO_ADMIN.child(userId).delete()
+            self.admins_users.discard(userId)
+            logger.info(f"User {userId} has been removed from admin.")
+        except Exception as e:
+            logger.error(f"Error removing admin user {userId}: {e}")
+
     def block_user(self, userId):
         try:
             self.INFO_DB.update({userId: True})
