@@ -632,7 +632,7 @@ def INFO(update: Update, context: CallbackContext) -> None:
 
 def GB_REFRESH(update: Update, context: CallbackContext) -> None:
   """REFRESH ALL USERS FROM CLOUD"""
-  if update.message.chat_id != ADMIN_CHAT_ID:  
+  if not _is_admin_Auth(update.message.chat_id):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
   users_id = DB.get_usernames()
@@ -896,7 +896,7 @@ def Token(update: Update, context: CallbackContext) -> None:
 def session_command(update: Update, context: CallbackContext) -> None:
     """Reports the total number of open chat sessions after password check."""
 
-    if update.message.chat_id != ADMIN_CHAT_ID:  
+    if not _is_admin_Auth(update.message.chat_id):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
             
@@ -910,7 +910,7 @@ def session_command(update: Update, context: CallbackContext) -> None:
 
 def session_info_command(update: Update, context: CallbackContext) -> None:
     """Reports the list of chat IDs for active chat sessions after password check."""
-    if update.message.chat_id != ADMIN_CHAT_ID:  
+    if not _is_admin_Auth(update.message.chat_id):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
@@ -1025,7 +1025,7 @@ def extract_chat_info(update: Update, context: CallbackContext) -> None:
     update: Update object from the Telegram Bot API.
     context: CallbackContext object from the Telegram Bot SDK.
   """
-  if update.message.chat_id != ADMIN_CHAT_ID:  
+  if not _is_admin_Auth(update.message.chat_id):  
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ ᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs .", parse_mode='HTML',reply_markup=Admin_error)
         return 
 
@@ -1409,7 +1409,7 @@ def error_handler(update: Updater, context: CallbackContext) -> None:
 
 def gb_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to all users."""
-    if update.message.chat_id != ADMIN_CHAT_ID:
+    if not _is_admin_Auth(update.message.chat_id):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1440,7 +1440,7 @@ def gb_broadcast(update: Update, context: CallbackContext) -> None:
 
 def specific_broadcast(update: Update, context: CallbackContext) -> None:
     """Broadcast a message to a specific user."""
-    if update.message.chat_id != ADMIN_CHAT_ID:
+    if not _is_admin_Auth(update.message.chat_id):
         update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1465,7 +1465,7 @@ def specific_broadcast(update: Update, context: CallbackContext) -> None:
 
 def block_user_command(update: Update, context: CallbackContext) -> None:
     """Block a user."""
-    if update.message.chat_id != ADMIN_CHAT_ID:
+    if not _is_admin_Auth(update.message.chat_id):
         update.message.reply_text("Access denied. Only admins can do this.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1479,7 +1479,7 @@ def block_user_command(update: Update, context: CallbackContext) -> None:
 
 def unblock_user_command(update: Update, context: CallbackContext) -> None:
     """Unblock a user."""
-    if update.message.chat_id != ADMIN_CHAT_ID:
+    if not _is_admin_Auth(update.message.chat_id):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1493,17 +1493,63 @@ def unblock_user_command(update: Update, context: CallbackContext) -> None:
 
 def all_blocked_users(update: Update, context: CallbackContext) -> None:
   """list of all blocked users"""
-  if update.message.chat_id != ADMIN_CHAT_ID:
+  if not _is_admin_Auth(update.message.chat_id):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
   blocked_users = DB.blocked_users_cache
   update.message.reply_text(f"Usᴇʀ ᴛʜᴀᴛ ᴀʀᴇ ᴜɴʙʟᴏᴄᴋᴇᴅ: {blocked_users}", parse_mode=ParseMode.HTML)
 
 
+def add_admin_command(update: Update, context: CallbackContext) -> None:
+    """add admin user."""
+    if update.message.chat_id != OWNER_ID:
+        update.message.reply_text("Access denied. Oɴʟʏ OWNER ᴄᴀɴ ᴀᴅᴅ ᴀᴅᴍɪɴs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
+        return
 
+    if len(context.args) != 1:
+        update.message.reply_text("Usᴀɢᴇ: /add_admin <ᴜsᴇʀ_ɪᴅ>", parse_mode=ParseMode.HTML)
+        return
+
+    user_id_to_add = context.args[0]
+    DB.add_admin(user_id_to_add)
+    update.message.reply_text(f"Usᴇʀ {user_id_to_add} ʜᴀs ʙᴇᴇɴ ᴍᴀᴅᴇ ᴀɴ ᴀᴅᴍɪɴ🎉🎉.", parse_mode=ParseMode.HTML)
+
+def unblock_user_command(update: Update, context: CallbackContext) -> None:
+    """remove admin user."""
+    if update.message.chat_id != OWNER_ID:
+        update.message.reply_text("Access denied. Oɴʟʏ OWNER ᴄᴀɴ ʀᴇᴍᴏᴠᴇ ᴀᴅᴍɪɴs", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
+        return
+
+    if len(context.args) != 1:
+        update.message.reply_text("Usᴀɢᴇ: /rm_admin <ᴜsᴇʀ_ɪᴅ>", parse_mode=ParseMode.HTML)
+        return
+
+    user_id_to_remove = context.args[0]
+    DB.remove_admin(user_id_to_remove)
+    update.message.reply_text(f"Usᴇʀ {user_id_to_remove} ʜᴀs ʙᴇᴇɴ ʀᴇᴍᴏᴠᴇᴅ ᴀs ᴀᴅᴍɪɴ😞😞.\nTʜɪs ᴀᴄᴛɪᴏɴs ᴡᴏᴜʟᴅɴ'ᴛ ʙᴀɴ ʜɪᴍ.", parse_mode=ParseMode.HTML)
+
+def all_admin_users(update: Update, context: CallbackContext) -> None:
+  """list of all admin users"""
+  if update.message.chat_id != OWNER_ID:
+        update.message.reply_text("Access denied. Oɴʟʏ OWNER ᴄᴀɴ sᴇᴇ ᴀᴅᴍɪɴs ʟɪsᴛ.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
+        return
+  admin_users = DB.admins_users
+  update.message.reply_text(f"Aʟʟ ᴛʜᴇ ᴜsᴇʀs ᴛʜᴀᴛ ᴀʀᴇ ᴀᴅᴍɪɴ🗂: {admin_users}", parse_mode=ParseMode.HTML)
+
+
+
+def _is_admin_Auth(id):
+    if DB.is_admin(id):
+        return True
+    else:
+        if id == OWNER_ID:
+            return True 
+        else:
+            return False
+        
 # Define the /ping command handler
 def ping(update: Update, context: CallbackContext) -> None:
-    if update.message.chat_id != ADMIN_CHAT_ID:
+    if not _is_admin_Auth(update.message.chat_id):
         update.message.reply_text("Aᴄᴄᴇss ᴅᴇɴɪᴇᴅ. Oɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴅᴏ ᴛʜɪs.", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
         return
 
@@ -1691,6 +1737,10 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("ban_ids", all_blocked_users))
     dispatcher.add_handler(CommandHandler("ping", ping))
     dispatcher.add_handler(CommandHandler("off", off))
+    #Owner commands
+    dispatcher.add_handler(CommandHandler("add_admin", add_admin_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("rm_admin", unblock_user_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("admins", all_blocked_users))
     
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
