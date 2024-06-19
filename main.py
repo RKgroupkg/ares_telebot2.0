@@ -1514,7 +1514,7 @@ def add_admin_command(update: Update, context: CallbackContext) -> None:
     DB.add_admin(user_id_to_add)
     update.message.reply_text(f"Usᴇʀ {user_id_to_add} ʜᴀs ʙᴇᴇɴ ᴍᴀᴅᴇ ᴀɴ ᴀᴅᴍɪɴ🎉🎉.", parse_mode=ParseMode.HTML)
 
-def unblock_user_command(update: Update, context: CallbackContext) -> None:
+def remove_admin_command(update: Update, context: CallbackContext) -> None:
     """remove admin user."""
     if update.message.from_user.id != OWNER_ID:
         update.message.reply_text("Access denied. Oɴʟʏ OWNER ᴄᴀɴ ʀᴇᴍᴏᴠᴇ ᴀᴅᴍɪɴs", parse_mode=ParseMode.HTML,reply_markup=Admin_error)
@@ -1739,8 +1739,8 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("off", off))
     #Owner commands
     dispatcher.add_handler(CommandHandler("add_admin", add_admin_command, pass_args=True))
-    dispatcher.add_handler(CommandHandler("rm_admin", unblock_user_command, pass_args=True))
-    dispatcher.add_handler(CommandHandler("admins", all_blocked_users))
+    dispatcher.add_handler(CommandHandler("rm_admin", remove_admin_command, pass_args=True))
+    dispatcher.add_handler(CommandHandler("admins", all_admin_users))
     
     dispatcher.add_handler(CommandHandler("image", image_command_handler))
     dispatcher.add_handler(CommandHandler("wiki", wiki))
